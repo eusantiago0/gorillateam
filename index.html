@@ -190,26 +190,32 @@
 
         <main class="flex-1 p-6 md:p-10 overflow-y-auto max-w-7xl mx-auto w-full">
             <div id="system-gym" class="space-y-6">
-                <!-- Painel de Alunos (Apenas Admin) -->
+                <!-- Painel de Alunos (Apenas Admin) + Barra de Pesquisa -->
                 <section id="g-tab-dashboard" class="space-y-6">
-                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
+                    <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gorilla-border pb-6 gap-4">
                         <div>
                             <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Consultoria</span>
                             <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Painel de Alunos</h2>
                         </div>
-                        <button id="btn-cadastrar-aluno" onclick="openModal('modal-aluno')" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive hidden">+ Cadastrar Aluno</button>
+                        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                            <input type="text" id="input-busca-alunos" oninput="filtrarAlunosAdmin()" placeholder="Pesquisar aluno por nome ou e-mail..." class="bg-gorilla-card border border-gorilla-border rounded-none px-4 py-2.5 text-xs text-white outline-none focus:border-gorilla-olive w-full sm:w-64 font-bold">
+                            <button id="btn-cadastrar-aluno" onclick="openModal('modal-aluno')" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive hidden whitespace-nowrap">+ Cadastrar Aluno</button>
+                        </div>
                     </header>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="lista-alunos-grid"></div>
                 </section>
 
-                <!-- Gestão de Treinos / Meus Treinos -->
+                <!-- Gestão de Treinos / Meus Treinos + Barra de Pesquisa -->
                 <section id="g-tab-workouts" class="space-y-6 hidden">
-                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
+                    <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gorilla-border pb-6 gap-4">
                         <div>
                             <span id="titulo-secao-treino-sub" class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Prescrição</span>
                             <h2 id="titulo-secao-treino" class="text-3xl font-black uppercase tracking-tight text-white italic">Gestão de Treinos</h2>
                         </div>
-                        <button id="btn-nova-ficha" onclick="abrirModalCriarTreino()" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive hidden">+ Nova Ficha</button>
+                        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                            <input type="text" id="input-busca-treinos" oninput="filtrarTreinosAdmin()" placeholder="Pesquisar treino ou aluno..." class="bg-gorilla-card border border-gorilla-border rounded-none px-4 py-2.5 text-xs text-white outline-none focus:border-gorilla-olive w-full sm:w-64 font-bold">
+                            <button id="btn-nova-ficha" onclick="abrirModalCriarTreino()" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive hidden whitespace-nowrap">+ Nova Ficha</button>
+                        </div>
                     </header>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="lista-treinos-grid"></div>
                 </section>
@@ -493,6 +499,10 @@
         window.db = db;
         window.auth = auth;
 
+        // Variáveis globais para armazenar cache para a busca em tempo real
+        window.cacheAlunos = [];
+        window.cacheTreinos = [];
+
         window.LOGO_GYM = `<div class="w-10 h-10 rounded-none bg-gorilla-olive flex items-center justify-center font-black text-white shadow-md overflow-hidden neon-box-olive">
             <svg viewBox="0 0 100 100" class="w-full h-full object-cover">
                 <circle cx="50" cy="50" r="45" fill="#121212" stroke="#657338" stroke-width="4"/>
@@ -619,6 +629,7 @@
                     document.getElementById('titulo-secao-treino').innerText = "Meus Treinos";
                     document.getElementById('btn-nova-ficha').classList.add('hidden');
                     document.getElementById('btn-nova-avaliacao').classList.add('hidden');
+                    document.getElementById('input-busca-treinos').style.display = 'none'; // Aluno não precisa de barra de busca global de treinos
                     switchTabGym('workouts');
                 } else {
                     document.getElementById('nav-g-dash').style.display = 'flex';
@@ -628,6 +639,7 @@
                     document.getElementById('titulo-secao-treino').innerText = "Gestão de Treinos";
                     document.getElementById('btn-nova-ficha').classList.remove('hidden');
                     document.getElementById('btn-nova-avaliacao').classList.remove('hidden');
+                    document.getElementById('input-busca-treinos').style.display = 'block';
                     switchTabGym('dashboard');
                 }
             } else {
@@ -715,28 +727,42 @@
             }
         }
 
+        // Tempo Real: Alunos Registrados com Filtro de Busca
         window.ouvirAlunosTempoReal = function() {
-            const grid = document.getElementById('lista-alunos-grid');
             onSnapshot(collection(db, "alunos"), (snapshot) => {
-                grid.innerHTML = '';
-                if(snapshot.empty) {
-                    grid.innerHTML = '<p class="text-xs text-gorilla-textMuted uppercase font-bold">Nenhum aluno cadastrado.</p>';
-                    return;
-                }
+                window.cacheAlunos = [];
                 snapshot.forEach((docSnap) => {
-                    const a = docSnap.data();
-                    let id = docSnap.id;
-                    let botaoExcluir = `<button onclick="deletarAluno('${id}')" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Apagar Aluno</button>`;
-                    grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-3 shadow-sm neon-box-olive flex justify-between items-start">
-                        <div>
-                            <h3 class="font-extrabold uppercase text-white tracking-tight">${a.nome}</h3>
-                            <p class="text-xs text-gorilla-textMuted">${a.email || 'Sem e-mail'}</p>
-                            <p class="text-[10px] text-gorilla-olive font-bold mt-1">${a.idade || 20} anos • ${a.sexo === 'F' ? 'Feminino' : 'Masculino'}</p>
-                        </div>
-                        <div>${botaoExcluir}</div>
-                    </div>`;
+                    window.cacheAlunos.push({ id: docSnap.id, ...docSnap.data() });
                 });
+                renderizarAlunosNaTela(window.cacheAlunos);
             });
+        }
+
+        window.renderizarAlunosNaTela = function(lista) {
+            const grid = document.getElementById('lista-alunos-grid');
+            grid.innerHTML = '';
+            if(!lista.length) {
+                grid.innerHTML = '<p class="text-xs text-gorilla-textMuted uppercase font-bold">Nenhum aluno encontrado.</p>';
+                return;
+            }
+            lista.forEach((a) => {
+                grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-3 shadow-sm neon-box-olive flex justify-between items-start">
+                    <div>
+                        <h3 class="font-extrabold uppercase text-white tracking-tight">${a.nome}</h3>
+                        <p class="text-xs text-gorilla-textMuted">${a.email || 'Sem e-mail'}</p>
+                        <p class="text-[10px] text-gorilla-olive font-bold mt-1">${a.idade || 20} anos • ${a.sexo === 'F' ? 'Feminino' : 'Masculino'}</p>
+                    </div>
+                    <div><button onclick="deletarAluno('${a.id}')" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Apagar Aluno</button></div>
+                </div>`;
+            });
+        }
+
+        window.filtrarAlunosAdmin = function() {
+            let termo = document.getElementById('input-busca-alunos').value.toLowerCase();
+            let filtrados = window.cacheAlunos.filter(a => 
+                a.nome.toLowerCase().includes(termo) || (a.email && a.email.toLowerCase().includes(termo))
+            );
+            renderizarAlunosNaTela(filtrados);
         }
 
         window.carregarSelectAlunosGym = async function() {
@@ -831,8 +857,8 @@
             }
         }
 
+        // Tempo Real: Gestão de Treinos com Filtro de Busca
         window.ouvirTreinosTempoReal = function() {
-            const grid = document.getElementById('lista-treinos-grid');
             let role = localStorage.getItem('gorilla_role');
             let userEmail = localStorage.getItem('gorilla_user_email');
 
@@ -845,71 +871,95 @@
                 });
 
                 onSnapshot(collection(db, "treinos"), (treinosSnap) => {
-                    grid.innerHTML = '';
-                    let treinosLista = [];
+                    window.cacheTreinos = [];
                     treinosSnap.forEach(docSnap => {
-                        treinosLista.push({id: docSnap.id, ...docSnap.data()});
+                        window.cacheTreinos.push({id: docSnap.id, ...docSnap.data()});
                     });
 
                     if(role === 'aluno') {
-                        treinosLista = treinosLista.filter(t => t.alunoId === meuAlunoId);
+                        window.cacheTreinos = window.cacheTreinos.filter(t => t.alunoId === meuAlunoId);
                     }
 
-                    if(!treinosLista.length) {
-                        grid.innerHTML = '<p class="text-xs text-gorilla-textMuted uppercase font-bold">Nenhum treino encontrado.</p>';
-                        return;
-                    }
-
-                    let cargasSalvas = JSON.parse(localStorage.getItem('gorilla_cargas_aluno')) || {};
-
-                    treinosLista.forEach(t => {
-                        let nomeAluno = mapaAlunos[t.alunoId] || 'Atleta';
-                        if(role === 'admin') {
-                            let exJson = encodeURIComponent(JSON.stringify(t.exercicios));
-                            grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-3 neon-box-olive flex justify-between items-start">
-                                <div>
-                                    <span class="text-[9px] text-gorilla-olive uppercase font-extrabold tracking-widest">Aluno: ${nomeAluno}</span>
-                                    <h3 class="font-extrabold uppercase text-white tracking-tight">${t.titulo}</h3>
-                                    <p class="text-[10px] text-gorilla-textMuted uppercase font-bold mt-1">${t.exercicios.length} exercícios prescritos</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="abrirModalEditarTreino('${t.id}', '${t.alunoId}', '${t.titulo}', '${exJson}')" class="text-[10px] text-gorilla-olive hover:underline uppercase font-bold">Editar</button>
-                                    <button onclick="deletarTreino('${t.id}')" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Apagar</button>
-                                </div>
-                            </div>`;
-                        } else {
-                            grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-6 space-y-4 shadow-xl neon-box-olive md:col-span-2">
-                                <div class="flex justify-between items-center border-b border-gorilla-border pb-3">
-                                    <h3 class="text-lg font-black uppercase text-white italic tracking-tight">${t.titulo}</h3>
-                                    <span class="text-[10px] uppercase font-bold bg-gorilla-olive/20 text-gorilla-olive px-2.5 py-1 rounded-none">Prescrito por Coach</span>
-                                </div>
-                                <div class="space-y-3">
-                                    ${t.exercicios.map((ex, idx) => {
-                                        let chaveCarga = `${t.alunoId}_${t.id}_${idx}`;
-                                        let cargaAtual = cargasSalvas[chaveCarga] || '';
-                                        return `
-                                            <div class="bg-gorilla-dark p-4 rounded-none border border-gorilla-border flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                                <div class="space-y-1">
-                                                    <div class="flex items-center gap-2">
-                                                        <input type="text" value="${ex.nome}" readonly class="bg-transparent font-extrabold text-sm uppercase text-white outline-none w-full md:w-72 cursor-default">
-                                                        ${ex.video ? `<a href="${ex.video}" target="_blank" class="text-[10px] bg-gorilla-border hover:bg-gorilla-olive text-white px-2.5 py-1 rounded-none font-bold transition-all">▶ Vídeo</a>` : ''}
-                                                    </div>
-                                                    <p class="text-xs text-gorilla-textMuted font-semibold">Meta (Coach): <span class="text-white">${ex.reps}</span></p>
-                                                </div>
-                                                <div class="flex items-center gap-2">
-                                                    <div class="text-right">
-                                                        <label class="block text-[9px] uppercase tracking-wider text-gorilla-olive font-extrabold">Sua Carga Real</label>
-                                                        <input type="text" value="${cargaAtual}" placeholder="Ex: 40kg" oninput="salvarCargaAtleta('${t.alunoId}', '${t.id}', ${idx}, this.value, '${ex.nome}')" class="bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs font-bold text-white w-28 text-center focus:border-gorilla-olive outline-none">
-                                                    </div>
-                                                </div>
-                                            </div>`;
-                                    }).join('')}
-                                </div>
-                            </div>`;
-                        }
-                    });
+                    renderizarTreinosNaTela(window.cacheTreinos, mapaAlunos, role);
                 });
             });
+        }
+
+        window.renderizarTreinosNaTela = function(treinosLista, mapaAlunos, role) {
+            const grid = document.getElementById('lista-treinos-grid');
+            grid.innerHTML = '';
+            
+            if(!treinosLista.length) {
+                grid.innerHTML = '<p class="text-xs text-gorilla-textMuted uppercase font-bold">Nenhum treino encontrado.</p>';
+                return;
+            }
+
+            let cargasSalvas = JSON.parse(localStorage.getItem('gorilla_cargas_aluno')) || {};
+
+            treinosLista.forEach(t => {
+                let nomeAluno = mapaAlunos[t.alunoId] || 'Atleta';
+                if(role === 'admin') {
+                    let exJson = encodeURIComponent(JSON.stringify(t.exercicios));
+                    grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-3 neon-box-olive flex justify-between items-start">
+                        <div>
+                            <span class="text-[9px] text-gorilla-olive uppercase font-extrabold tracking-widest">Aluno: ${nomeAluno}</span>
+                            <h3 class="font-extrabold uppercase text-white tracking-tight">${t.titulo}</h3>
+                            <p class="text-[10px] text-gorilla-textMuted uppercase font-bold mt-1">${t.exercicios.length} exercícios prescritos</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="abrirModalEditarTreino('${t.id}', '${t.alunoId}', '${t.titulo}', '${exJson}')" class="text-[10px] text-gorilla-olive hover:underline uppercase font-bold">Editar</button>
+                            <button onclick="deletarTreino('${t.id}')" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Apagar</button>
+                        </div>
+                    </div>`;
+                } else {
+                    grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-6 space-y-4 shadow-xl neon-box-olive md:col-span-2">
+                        <div class="flex justify-between items-center border-b border-gorilla-border pb-3">
+                            <h3 class="text-lg font-black uppercase text-white italic tracking-tight">${t.titulo}</h3>
+                            <span class="text-[10px] uppercase font-bold bg-gorilla-olive/20 text-gorilla-olive px-2.5 py-1 rounded-none">Prescrito por Coach</span>
+                        </div>
+                        <div class="space-y-3">
+                            ${t.exercicios.map((ex, idx) => {
+                                let chaveCarga = `${t.alunoId}_${t.id}_${idx}`;
+                                let cargaAtual = cargasSalvas[chaveCarga] || '';
+                                return `
+                                    <div class="bg-gorilla-dark p-4 rounded-none border border-gorilla-border flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div class="space-y-1">
+                                            <div class="flex items-center gap-2">
+                                                <input type="text" value="${ex.nome}" readonly class="bg-transparent font-extrabold text-sm uppercase text-white outline-none w-full md:w-72 cursor-default">
+                                                ${ex.video ? `<a href="${ex.video}" target="_blank" class="text-[10px] bg-gorilla-border hover:bg-gorilla-olive text-white px-2.5 py-1 rounded-none font-bold transition-all">▶ Vídeo</a>` : ''}
+                                            </div>
+                                            <p class="text-xs text-gorilla-textMuted font-semibold">Meta (Coach): <span class="text-white">${ex.reps}</span></p>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="text-right">
+                                                <label class="block text-[9px] uppercase tracking-wider text-gorilla-olive font-extrabold">Sua Carga Real</label>
+                                                <input type="text" value="${cargaAtual}" placeholder="Ex: 40kg" oninput="salvarCargaAtleta('${t.alunoId}', '${t.id}', ${idx}, this.value, '${ex.nome}')" class="bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs font-bold text-white w-28 text-center focus:border-gorilla-olive outline-none">
+                                            </div>
+                                        </div>
+                                    </div>`;
+                            }).join('')}
+                        </div>
+                    </div>`;
+                }
+            });
+        }
+
+        window.filtrarTreinosAdmin = async function() {
+            let termo = document.getElementById('input-busca-treinos').value.toLowerCase();
+            let role = localStorage.getItem('gorilla_role');
+            
+            // Buscar mapa de alunos atualizado para associar nome do aluno na busca
+            const alunosSnap = await getDocs(collection(db, "alunos"));
+            let mapaAlunos = {};
+            alunosSnap.forEach(d => mapaAlunos[d.id] = d.data().nome);
+
+            let filtrados = window.cacheTreinos.filter(t => {
+                let nomeAluno = (mapaAlunos[t.alunoId] || '').toLowerCase();
+                let tituloTreino = t.titulo.toLowerCase();
+                return tituloTreino.includes(termo) || nomeAluno.includes(termo);
+            });
+
+            renderizarTreinosNaTela(filtrados, mapaAlunos, role);
         }
 
         window.salvarCargaAtleta = function(alunoId, treinoId, idx, valor, nomeExercicio) {
