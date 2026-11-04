@@ -64,7 +64,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- TELA DE LOGIN / REGISTRO BRUTALISTA -->
+    <!-- TELA DE LOGIN / REGISTRO -->
     <div id="view-login" class="min-h-screen flex flex-col items-center justify-center p-6 relative" style="background: linear-gradient(180deg, rgba(10,10,10,0.7) 0%, rgba(10,10,10,0.95) 100%), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1800&auto=format&fit=crop') center/cover;">
         <div class="max-w-md w-full bg-gorilla-card border border-gorilla-border p-10 space-y-8 shadow-2xl relative z-10 rounded-none neon-box-olive">
             <div class="space-y-3 text-left">
@@ -73,7 +73,6 @@
                 <p id="auth-subtitle" class="text-[10px] text-gorilla-textMuted uppercase tracking-[0.3em] font-extrabold">Restricted Access // High Performance</p>
             </div>
 
-            <!-- FORMULÁRIO DE LOGIN -->
             <form id="form-login" onsubmit="fazerLoginFirebase(event)" class="space-y-5">
                 <div class="space-y-1">
                     <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted tracking-widest">E-mail</label>
@@ -85,11 +84,10 @@
                 </div>
                 <button type="submit" class="w-full bg-gorilla-olive hover:bg-gorilla-oliveHover text-white py-4 rounded-none font-black text-xs uppercase tracking-[0.2em] transition-all neon-box-olive">AUTENTICAR</button>
                 <div class="text-center pt-2">
-                    <button type="button" onclick="alternarTelaAuth('registrar')" class="text-[10px] text-gorilla-textMuted hover:text-white uppercase font-bold tracking-widest underline">Não tem conta? Registre-se aqui</button>
+                    <button type="button" onclick="alternarTelaAuth('registrar')" class="text-[10px] text-gorilla-textMuted hover:text-white uppercase font-bold tracking-widest underline">Criar conta de aluno</button>
                 </div>
             </form>
 
-            <!-- FORMULÁRIO DE REGISTRO (Oculto por padrão) -->
             <form id="form-registro" onsubmit="fazerRegistroFirebase(event)" class="space-y-4 hidden">
                 <div class="space-y-1">
                     <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted tracking-widest">Nome Completo</label>
@@ -103,7 +101,7 @@
                     <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted tracking-widest">Password</label>
                     <input type="password" id="reg-senha" placeholder="Mínimo 6 caracteres" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-3 text-xs font-bold text-white focus:border-gorilla-olive outline-none">
                 </div>
-                <button type="submit" class="w-full bg-gorilla-olive hover:bg-gorilla-oliveHover text-white py-4 rounded-none font-black text-xs uppercase tracking-[0.2em] transition-all neon-box-olive">CRIAR CONTA</button>
+                <button type="submit" class="w-full bg-gorilla-olive hover:bg-gorilla-oliveHover text-white py-4 rounded-none font-black text-xs uppercase tracking-[0.2em] transition-all neon-box-olive">REGISTRAR ATLETA</button>
                 <div class="text-center pt-2">
                     <button type="button" onclick="alternarTelaAuth('login')" class="text-[10px] text-gorilla-textMuted hover:text-white uppercase font-bold tracking-widest underline">Já tem conta? Faça login</button>
                 </div>
@@ -113,7 +111,7 @@
         </div>
     </div>
 
-    <!-- TELA DE SELEÇÃO INICIAL (HOME COM CORTE DIAGONAL) -->
+    <!-- TELA DE SELEÇÃO INICIAL -->
     <div id="view-home" class="split-diagonal bg-gorilla-dark hidden">
         <div class="absolute top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center flex items-center gap-6">
             <div>
@@ -196,7 +194,7 @@
                             <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Consultoria</span>
                             <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Painel de Alunos</h2>
                         </div>
-                        <button onclick="openModal('modal-aluno')" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive">+ Cadastrar Aluno</button>
+                        <button id="btn-cadastrar-aluno" onclick="openModal('modal-aluno')" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive hidden">+ Cadastrar Aluno</button>
                     </header>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="lista-alunos-grid"></div>
                 </section>
@@ -207,7 +205,7 @@
                             <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Prescrição</span>
                             <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Gestão de Treinos</h2>
                         </div>
-                        <button onclick="openModal('modal-treino')" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive">+ Nova Ficha</button>
+                        <button id="btn-nova-ficha" onclick="openModal('modal-treino')" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive hidden">+ Nova Ficha</button>
                     </header>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="lista-treinos-grid"></div>
                 </section>
@@ -321,7 +319,7 @@
             <h3 class="text-lg font-black uppercase tracking-wider text-white">Nova Ficha de Treino</h3>
             <form onsubmit="salvarTreino(event)" class="space-y-3">
                 <select id="treino-aluno-id" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-2.5 text-xs font-bold uppercase text-white outline-none focus:border-gorilla-olive"></select>
-                <input type="text" id="treino-titulo" placeholder="Título / Divisão" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-2.5 text-xs font-bold uppercase text-white outline-none focus:border-gorilla-olive">
+                <input type="text" id="treino-titulo" placeholder="Título / Divisão (Ex: Treino A - Peito/Tríceps)" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-2.5 text-xs font-bold uppercase text-white outline-none focus:border-gorilla-olive">
                 <div id="container-exercicios" class="space-y-3 max-h-60 overflow-y-auto pr-1">
                     <div class="bg-gorilla-dark p-3 rounded-none border border-gorilla-border space-y-2">
                         <div class="flex gap-2">
@@ -397,7 +395,7 @@
         </div>
     </div>
 
-    <!-- SCRIPTS DO FIREBASE E APLICAÇÃO -->
+    <!-- SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -438,15 +436,25 @@
             </svg>
         </div>`;
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('view-login').classList.add('hidden');
                 if(user.email.includes('admin') || user.email === 'admin@gorillateam.pro') {
                     localStorage.setItem('gorilla_role', 'admin');
                     document.getElementById('view-home').classList.remove('hidden');
+                    document.getElementById('btn-cadastrar-aluno')?.classList.remove('hidden');
+                    document.getElementById('btn-nova-ficha')?.classList.remove('hidden');
                 } else {
                     localStorage.setItem('gorilla_role', 'aluno');
                     localStorage.setItem('gorilla_user_email', user.email);
+                    
+                    // Descobre o ID do aluno logado no Firestore com base no e-mail
+                    const snap = await getDocs(collection(db, "alunos"));
+                    let meuId = '';
+                    snap.forEach(d => {
+                        if(d.data().email === user.email) meuId = d.id;
+                    });
+                    localStorage.setItem('gorilla_aluno_id', meuId);
                     abrirPainelAlunoRestrito();
                 }
             } else {
@@ -495,11 +503,11 @@
             const senha = document.getElementById('reg-senha').value;
             const erroEl = document.getElementById('login-erro');
             try {
-                // Cria a conta no Auth do Firebase
                 const cred = await createUserWithEmailAndPassword(auth, email, senha);
-                // Salva automaticamente o perfil do aluno no Firestore
                 await addDoc(collection(db, "alunos"), { nome, email, idade: 20, sexo: 'M', uid: cred.user.uid, createdAt: Date.now() });
                 erroEl.classList.add('hidden');
+                alert("Conta criada com sucesso! Faça login com suas credenciais.");
+                alternarTelaAuth('login');
             } catch (error) {
                 erroEl.innerText = "Erro no registro: " + error.message;
                 erroEl.classList.remove('hidden');
@@ -660,17 +668,28 @@
                 await addDoc(collection(db, "treinos"), { alunoId, titulo, exercicios, createdAt: Date.now() });
                 closeModal('modal-treino');
                 carregarTreinosGym();
+                alert("Ficha de treino criada e enviada para o aluno com sucesso!");
             } catch(err) { alert("Erro ao salvar treino."); }
         }
 
         window.carregarTreinosGym = async function() {
             const grid = document.getElementById('lista-treinos-grid');
             grid.innerHTML = '<p class="text-xs text-gorilla-textMuted uppercase font-bold">Carregando treinos...</p>';
+            
+            const alunosSnap = await getDocs(collection(db, "alunos"));
+            let mapaAlunos = {};
+            alunosSnap.forEach(d => mapaAlunos[d.id] = d.data().nome);
+
             const querySnapshot = await getDocs(collection(db, "treinos"));
             grid.innerHTML = '';
             querySnapshot.forEach((docSnap) => {
                 const t = docSnap.data();
-                grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-2 neon-box-olive"><h3 class="font-extrabold uppercase text-white tracking-tight">${t.titulo}</h3><p class="text-[10px] text-gorilla-olive uppercase font-bold">${t.exercicios.length} exercícios prescritos</p></div>`;
+                let nomeAluno = mapaAlunos[t.alunoId] || 'Atleta';
+                grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-2 neon-box-olive">
+                    <span class="text-[9px] text-gorilla-olive uppercase font-extrabold tracking-widest">Aluno: ${nomeAluno}</span>
+                    <h3 class="font-extrabold uppercase text-white tracking-tight">${t.titulo}</h3>
+                    <p class="text-[10px] text-gorilla-textMuted uppercase font-bold">${t.exercicios.length} exercícios prescritos</p>
+                </div>`;
             });
         }
 
@@ -688,51 +707,77 @@
             const cont = document.getElementById('conteudo-portal-aluno');
             let role = localStorage.getItem('gorilla_role');
             let alunoId;
+            
             const alunosSnap = await getDocs(collection(db, "alunos"));
             let listaAlunos = [];
             alunosSnap.forEach(d => listaAlunos.push({id: d.id, ...d.data()}));
 
             if(role === 'aluno') {
-                alunoId = listaAlunos[0] ? listaAlunos[0].id : '';
+                alunoId = localStorage.getItem('gorilla_aluno_id');
+                // Se por acaso o ID direto não veio, pega o primeiro correspondente ao e-mail logado
+                if(!alunoId) {
+                    let userEmail = localStorage.getItem('gorilla_user_email');
+                    let achado = listaAlunos.find(a => a.email === userEmail);
+                    if(achado) alunoId = achado.id;
+                }
             } else {
                 alunoId = document.getElementById('select-aluno-portal').value;
             }
 
             if(!alunoId) {
-                cont.innerHTML = '<div class="bg-gorilla-card p-6 rounded-none border border-gorilla-border text-center text-xs text-gorilla-textMuted uppercase font-bold">Nenhum aluno cadastrado.</div>';
+                cont.innerHTML = '<div class="bg-gorilla-card p-6 rounded-none border border-gorilla-border text-center text-xs text-gorilla-textMuted uppercase font-bold">Nenhum perfil de aluno vinculado.</div>';
                 return;
             }
 
             const treinosSnap = await getDocs(collection(db, "treinos"));
             let treinosAluno = [];
             treinosSnap.forEach(d => {
-                if(d.data().alunoId === alunoId) treinosAluno.push(d.data());
+                if(d.data().alunoId === alunoId) treinosAluno.push({id: d.id, ...d.data()});
             });
 
             if(!treinosAluno.length) {
-                cont.innerHTML = '<div class="bg-gorilla-card p-6 rounded-none border border-gorilla-border text-center text-xs text-gorilla-textMuted uppercase font-bold">Nenhum treino prescrito para este atleta.</div>';
+                cont.innerHTML = '<div class="bg-gorilla-card p-6 rounded-none border border-gorilla-border text-center text-xs text-gorilla-textMuted uppercase font-bold">Nenhum treino prescrito pelo coach ainda.</div>';
                 return;
             }
+
+            let cargasSalvas = JSON.parse(localStorage.getItem('gorilla_cargas_aluno')) || {};
 
             cont.innerHTML = treinosAluno.map(t => `
                 <div class="bg-gorilla-card border border-gorilla-border rounded-none p-6 space-y-4 shadow-xl neon-box-olive">
                     <div class="flex justify-between items-center border-b border-gorilla-border pb-3">
                         <h3 class="text-lg font-black uppercase text-white italic tracking-tight">${t.titulo}</h3>
-                        <span class="text-[10px] uppercase font-bold bg-gorilla-olive/20 text-gorilla-olive px-2.5 py-1 rounded-none">Ativo</span>
+                        <span class="text-[10px] uppercase font-bold bg-gorilla-olive/20 text-gorilla-olive px-2.5 py-1 rounded-none">Prescrito por Coach</span>
                     </div>
                     <div class="space-y-3">
-                        ${t.exercicios.map((ex, idx) => `
-                            <div class="bg-gorilla-dark p-4 rounded-none border border-gorilla-border flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                <div class="space-y-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-extrabold text-sm uppercase text-white">${ex.nome}</span>
-                                        ${ex.video ? `<a href="${ex.video}" target="_blank" class="text-[10px] bg-gorilla-border hover:bg-gorilla-olive text-white px-2.5 py-1 rounded-none font-bold transition-all">▶ Vídeo</a>` : ''}
+                        ${t.exercicios.map((ex, idx) => {
+                            let chaveCarga = `${alunoId}_${t.id}_${idx}`;
+                            let cargaAtual = cargasSalvas[chaveCarga] || '';
+                            return `
+                                <div class="bg-gorilla-dark p-4 rounded-none border border-gorilla-border flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-2">
+                                            <input type="text" value="${ex.nome}" readonly class="bg-transparent font-extrabold text-sm uppercase text-white outline-none w-full md:w-72 cursor-default">
+                                            ${ex.video ? `<a href="${ex.video}" target="_blank" class="text-[10px] bg-gorilla-border hover:bg-gorilla-olive text-white px-2.5 py-1 rounded-none font-bold transition-all">▶ Vídeo</a>` : ''}
+                                        </div>
+                                        <p class="text-xs text-gorilla-textMuted font-semibold">Meta (Coach): <span class="text-white">${ex.reps}</span></p>
                                     </div>
-                                    <p class="text-xs text-gorilla-textMuted font-semibold">Meta: <span class="text-white">${ex.reps}</span></p>
-                                </div>
-                            </div>`).join('')}
+                                    <div class="flex items-center gap-2">
+                                        <div class="text-right">
+                                            <label class="block text-[9px] uppercase tracking-wider text-gorilla-olive font-extrabold">Sua Carga Real</label>
+                                            <input type="text" value="${cargaAtual}" placeholder="Ex: 40kg" oninput="salvarCargaAtleta('${alunoId}', '${t.id}', ${idx}, this.value)" class="bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs font-bold text-white w-28 text-center focus:border-gorilla-olive outline-none">
+                                        </div>
+                                    </div>
+                                </div>`;
+                        }).join('')}
                     </div>
                 </div>`).join('');
+        }
+
+        window.salvarCargaAtleta = function(alunoId, treinoId, idx, valor) {
+            let cargasSalvas = JSON.parse(localStorage.getItem('gorilla_cargas_aluno')) || {};
+            let chave = `${alunoId}_${treinoId}_${idx}`;
+            cargasSalvas[chave] = valor;
+            localStorage.setItem('gorilla_cargas_aluno', JSON.stringify(cargasSalvas));
         }
 
         window.salvarJogada = async function(e) {
