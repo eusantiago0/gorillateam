@@ -49,7 +49,7 @@
         }
         .gym-diagonal:hover { filter: brightness(1.1); }
         .basket-diagonal {
-            background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.92) 100%), url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1600&auto=format&fit=crop') center/cover;
+            background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.92) 100%), url('https://images.unsplash.com/photo-1519766304817-4f37bda74a29?q=80&w=1600&auto=format&fit=crop') center/cover;
             clip-path: polygon(65% 0, 100% 0, 100% 100%, 35% 100%); z-index: 1; align-items: flex-end; text-align: right;
         }
         .basket-diagonal:hover { filter: brightness(1.1); }
@@ -226,15 +226,13 @@
                     <div id="container-avaliacoes-content" class="space-y-6"></div>
                 </section>
 
-                <!-- Minha Evolução (Gráficos de Carga - Exclusivo Aluno) -->
+                <!-- Minha Evolução (Gráficos Separados por Exercício - Exclusivo Aluno) -->
                 <section id="g-tab-evolution" class="space-y-6 hidden">
                     <header class="border-b border-gorilla-border pb-6">
                         <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Performance Tracker</span>
-                        <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Minha Evolução de Carga</h2>
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Minha Evolução de Carga por Exercício</h2>
                     </header>
-                    <div class="bg-gorilla-card border border-gorilla-border p-6 rounded-none neon-box-olive shadow-xl">
-                        <canvas id="graficoEvolucaoCarga" class="w-full h-80"></canvas>
-                    </div>
+                    <div id="container-graficos-exercicios" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
                 </section>
             </div>
 
@@ -355,18 +353,59 @@
         </div>
     </div>
 
-    <!-- Modal Nova Avaliação Física (Pollock 7 Dobras) -->
+    <!-- Modal Completo de Avaliação Física (Pollock 7 Dobras) - Admin -->
     <div id="modal-avaliacao" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-gorilla-card border border-gorilla-border rounded-none max-w-lg w-full p-6 space-y-4 shadow-2xl neon-box-olive">
-            <h3 class="text-lg font-black uppercase tracking-wider text-white">Nova Avaliação Física (Pollock 7)</h3>
-            <form onsubmit="salvarAvaliacaoFisica(event)" class="space-y-3">
-                <select id="aval-aluno-id" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-2.5 text-xs font-bold uppercase text-white outline-none focus:border-gorilla-olive"></select>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="number" step="0.1" id="aval-peso" placeholder="Peso (kg)" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
-                    <input type="number" step="0.1" id="aval-dobra" placeholder="% Gordura Estimada" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+        <div class="bg-gorilla-card border border-gorilla-border rounded-none max-w-2xl w-full p-6 space-y-4 shadow-2xl neon-box-olive max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-black uppercase tracking-wider text-white">Nova Avaliação Antropométrica (Pollock 7 Dobras)</h3>
+            <form onsubmit="salvarAvaliacaoFisicaCompleta(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted mb-1">Aluno</label>
+                        <select id="aval-aluno-id" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs font-bold uppercase text-white outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted mb-1">Data da Avaliação</label>
+                        <input type="date" id="aval-data" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                    </div>
                 </div>
-                <input type="date" id="aval-data" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
-                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-avaliacao')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button><button type="submit" class="bg-gorilla-olive text-white px-5 py-2 rounded-none text-xs font-bold uppercase tracking-wider">Salvar Avaliação</button></div>
+
+                <div class="border-t border-gorilla-border pt-3">
+                    <h4 class="text-xs font-extrabold uppercase text-gorilla-olive tracking-widest mb-2">Composição Corporal Básica</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" step="0.1" id="aval-peso" placeholder="Peso Atual (kg)" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="aval-altura" placeholder="Altura (cm - ex: 175)" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                    </div>
+                </div>
+
+                <div class="border-t border-gorilla-border pt-3">
+                    <h4 class="text-xs font-extrabold uppercase text-gorilla-olive tracking-widest mb-2">Dobras Cutâneas (mm) - Pollock 7</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <input type="number" step="0.1" id="dobra-torax" placeholder="Tórax" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="dobra-subescapular" placeholder="Subescapular" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="dobra-axilar" placeholder="Axilar Média" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="dobra-suprailiaca" placeholder="Supra-ilíaca" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="dobra-abdominal" placeholder="Abdominal" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="dobra-coxa" placeholder="Coxa" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="dobra-triceps" placeholder="Tríceps" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                    </div>
+                </div>
+
+                <div class="border-t border-gorilla-border pt-3">
+                    <h4 class="text-xs font-extrabold uppercase text-gorilla-olive tracking-widest mb-2">Perímetros / Circunferências (cm)</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <input type="number" step="0.1" id="per-braco" placeholder="Braço Relaxado" class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="per-cintura" placeholder="Cintura" class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="per-abdomen" placeholder="Abdômen" class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="per-quadril" placeholder="Quadril" class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="per-coxa" placeholder="Coxa Medial" class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                        <input type="number" step="0.1" id="per-panturrilha" placeholder="Panturrilha" class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeModal('modal-avaliacao')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button>
+                    <button type="submit" class="bg-gorilla-olive text-white px-5 py-2.5 rounded-none text-xs font-bold uppercase tracking-wider">Salvar Avaliação Completa</button>
+                </div>
             </form>
         </div>
     </div>
@@ -573,9 +612,9 @@
                 document.getElementById('sidebar-subtitle').className = "text-[9px] uppercase tracking-widest text-gorilla-olive font-bold neon-text-olive";
                 
                 if(role === 'aluno') {
-                    document.getElementById('nav-g-dash').style.display = 'none'; // Remove painel de alunos para o aluno
+                    document.getElementById('nav-g-dash').style.display = 'none';
                     document.getElementById('nav-g-work').innerText = "Meus Treinos";
-                    document.getElementById('nav-g-evol').classList.remove('hidden'); // Exibe Minha Evolução
+                    document.getElementById('nav-g-evol').classList.remove('hidden');
                     document.getElementById('titulo-secao-treino-sub').innerText = "Área do Atleta";
                     document.getElementById('titulo-secao-treino').innerText = "Meus Treinos";
                     document.getElementById('btn-nova-ficha').classList.add('hidden');
@@ -635,7 +674,7 @@
             if(tab === 'workouts') ouvirTreinosTempoReal();
             if(tab === 'dashboard') ouvirAlunosTempoReal();
             if(tab === 'evaluations') ouvirAvaliacoesTempoReal();
-            if(tab === 'evolution') renderizarGraficoEvolucaoCarga();
+            if(tab === 'evolution') renderizarGraficosEvolucaoPorExercicio();
         }
 
         window.switchTabBasket = function(tab) {
@@ -792,7 +831,6 @@
             }
         }
 
-        // TEMPO REAL: Gestão de Treinos (Admin) e Meus Treinos (Aluno)
         window.ouvirTreinosTempoReal = function() {
             const grid = document.getElementById('lista-treinos-grid');
             let role = localStorage.getItem('gorilla_role');
@@ -840,7 +878,6 @@
                                 </div>
                             </div>`;
                         } else {
-                            // Visão do Aluno (com inputs de carga editáveis)
                             grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-6 space-y-4 shadow-xl neon-box-olive md:col-span-2">
                                 <div class="flex justify-between items-center border-b border-gorilla-border pb-3">
                                     <h3 class="text-lg font-black uppercase text-white italic tracking-tight">${t.titulo}</h3>
@@ -862,7 +899,7 @@
                                                 <div class="flex items-center gap-2">
                                                     <div class="text-right">
                                                         <label class="block text-[9px] uppercase tracking-wider text-gorilla-olive font-extrabold">Sua Carga Real</label>
-                                                        <input type="text" value="${cargaAtual}" placeholder="Ex: 40kg" oninput="salvarCargaAtleta('${t.alunoId}', '${t.id}', ${idx}, this.value)" class="bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs font-bold text-white w-28 text-center focus:border-gorilla-olive outline-none">
+                                                        <input type="text" value="${cargaAtual}" placeholder="Ex: 40kg" oninput="salvarCargaAtleta('${t.alunoId}', '${t.id}', ${idx}, this.value, '${ex.nome}')" class="bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs font-bold text-white w-28 text-center focus:border-gorilla-olive outline-none">
                                                     </div>
                                                 </div>
                                             </div>`;
@@ -875,30 +912,71 @@
             });
         }
 
-        window.salvarCargaAtleta = function(alunoId, treinoId, idx, valor) {
+        window.salvarCargaAtleta = function(alunoId, treinoId, idx, valor, nomeExercicio) {
             let cargasSalvas = JSON.parse(localStorage.getItem('gorilla_cargas_aluno')) || {};
             let chave = `${alunoId}_${treinoId}_${idx}`;
             cargasSalvas[chave] = valor;
             localStorage.setItem('gorilla_cargas_aluno', JSON.stringify(cargasSalvas));
+
+            // Salva histórico temporal para gráficos por exercício
+            let historico = JSON.parse(localStorage.getItem('gorilla_historico_cargas')) || {};
+            if(!historico[alunoId]) historico[alunoId] = {};
+            if(!historico[alunoId][nomeExercicio]) historico[alunoId][nomeExercicio] = [];
+            
+            let hoje = new Date().toLocaleDateString();
+            let ultimoReg = historico[alunoId][nomeExercicio][historico[alunoId][nomeExercicio].length - 1];
+            if(ultimoReg && ultimoReg.data === hoje) {
+                ultimoReg.carga = parseFloat(valor) || 0;
+            } else {
+                historico[alunoId][nomeExercicio].push({ data: hoje, carga: parseFloat(valor) || 0 });
+            }
+            localStorage.setItem('gorilla_historico_cargas', JSON.stringify(historico));
         }
 
-        // SISTEMA DE AVALIAÇÕES FÍSICAS
-        window.salvarAvaliacaoFisica = async function(e) {
+        // SALVAR AVALIAÇÃO FÍSICA COMPLETA (ADMIN)
+        window.salvarAvaliacaoFisicaCompleta = async function(e) {
             e.preventDefault();
             const alunoId = document.getElementById('aval-aluno-id').value;
-            const peso = parseFloat(document.getElementById('aval-peso').value);
-            const gordura = parseFloat(document.getElementById('aval-dobra').value);
             const data = document.getElementById('aval-data').value;
+            const peso = parseFloat(document.getElementById('aval-peso').value);
+            const altura = parseFloat(document.getElementById('aval-altura').value);
+            
+            const dobras = {
+                torax: parseFloat(document.getElementById('dobra-torax').value),
+                subescapular: parseFloat(document.getElementById('dobra-subescapular').value),
+                axilar: parseFloat(document.getElementById('dobra-axilar').value),
+                suprailiaca: parseFloat(document.getElementById('dobra-suprailiaca').value),
+                abdominal: parseFloat(document.getElementById('dobra-abdominal').value),
+                coxa: parseFloat(document.getElementById('dobra-coxa').value),
+                triceps: parseFloat(document.getElementById('dobra-triceps').value)
+            };
+
+            const perimetros = {
+                braco: parseFloat(document.getElementById('per-braco').value) || 0,
+                cintura: parseFloat(document.getElementById('per-cintura').value) || 0,
+                abdomen: parseFloat(document.getElementById('per-abdomen').value) || 0,
+                quadril: parseFloat(document.getElementById('per-quadril').value) || 0,
+                coxa: parseFloat(document.getElementById('per-coxa').value) || 0,
+                panturrilha: parseFloat(document.getElementById('per-panturrilha').value) || 0
+            };
+
+            // Cálculo simplificado de % gordura Pollock 7 dobras (Homem)
+            let somaDobras = dobras.torax + dobras.subescapular + dobras.axilar + dobras.suprailiaca + dobras.abdominal + dobras.coxa + dobras.triceps;
+            let densidade = 1.112 - (0.00043499 * somaDobras) + (0.00000055 * (somaDobras * somaDobras)) - (0.00028826 * 22); // idade média 22
+            let gorduraPerc = ((4.95 / densidade) - 4.5) * 100;
+
             try {
-                await addDoc(collection(db, "avaliacoes"), { alunoId, peso, gordura, data, createdAt: Date.now() });
+                await addDoc(collection(db, "avaliacoes_completas"), {
+                    alunoId, data, peso, altura, dobras, perimetros, gorduraPerc: gorduraPerc.toFixed(1), createdAt: Date.now()
+                });
                 closeModal('modal-avaliacao');
-                alert("Avaliação física salva com sucesso!");
-            } catch(err) { alert("Erro ao salvar avaliação."); }
+                alert("Avaliação física completa salva com sucesso!");
+            } catch(err) { alert("Erro ao salvar avaliação física."); }
         }
 
-        window.deletarAvaliacao = async function(id) {
+        window.deletarAvaliacaoCompleta = async function(id) {
             if(confirm("Pretendes apagar esta avaliação?")) {
-                await deleteDoc(doc(db, "avaliacoes", id));
+                await deleteDoc(doc(db, "avaliacoes_completas", id));
             }
         }
 
@@ -915,7 +993,7 @@
                     if(d.data().email === userEmail) meuAlunoId = d.id;
                 });
 
-                onSnapshot(collection(db, "avaliacoes"), (avalSnap) => {
+                onSnapshot(collection(db, "avaliacoes_completas"), (avalSnap) => {
                     let avals = [];
                     avalSnap.forEach(d => avals.push({id: d.id, ...d.data()}));
                     
@@ -924,72 +1002,91 @@
                     }
 
                     if(!avals.length) {
-                        container.innerHTML = '<div class="bg-gorilla-card p-6 rounded-none border border-gorilla-border text-center text-xs text-gorilla-textMuted uppercase font-bold">Nenhuma avaliação física registrada.</div>';
+                        container.innerHTML = '<div class="bg-gorilla-card p-6 rounded-none border border-gorilla-border text-center text-xs text-gorilla-textMuted uppercase font-bold">Nenhuma avaliação física cadastrada.</div>';
                         return;
                     }
 
                     container.innerHTML = `
-                        <div class="bg-gorilla-card border border-gorilla-border p-6 rounded-none neon-box-olive shadow-xl">
-                            <h3 class="font-extrabold uppercase text-white text-base tracking-tight mb-4">Evolução Antropométrica (Pollock 7)</h3>
-                            <canvas id="graficoAvaliacoes" class="w-full h-72"></canvas>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 gap-4">
                             ${avals.map(a => `
-                                <div class="bg-gorilla-card border border-gorilla-border p-5 rounded-none space-y-2 neon-box-olive flex justify-between items-center">
-                                    <div>
-                                        <span class="text-[9px] text-gorilla-olive uppercase font-extrabold tracking-widest">${mapaAlunos[a.alunoId] || 'Atleta'} • ${a.data}</span>
-                                        <h4 class="font-black uppercase text-white text-lg">Peso: ${a.peso} kg</h4>
-                                        <p class="text-xs text-gorilla-textMuted font-bold">Gordura Corporal: <span class="text-white">${a.gordura}%</span></p>
+                                <div class="bg-gorilla-card border border-gorilla-border p-6 rounded-none space-y-4 neon-box-olive">
+                                    <div class="flex justify-between items-center border-b border-gorilla-border pb-3">
+                                        <div>
+                                            <span class="text-[9px] text-gorilla-olive uppercase font-extrabold tracking-widest">Aluno: ${mapaAlunos[a.alunoId] || 'Atleta'}</span>
+                                            <h3 class="font-black uppercase text-white text-base">Avaliação em ${a.data}</h3>
+                                        </div>
+                                        ${role === 'admin' ? `<button onclick="deletarAvaliacaoCompleta('${a.id}')" class="text-[10px] text-red-400 uppercase font-bold">Apagar</button>` : ''}
                                     </div>
-                                    ${role === 'admin' ? `<button onclick="deletarAvaliacao('${a.id}')" class="text-[10px] text-red-400 uppercase font-bold">Apagar</button>` : ''}
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                                        <div class="bg-gorilla-dark p-3 border border-gorilla-border"><span class="text-gorilla-textMuted block">Peso</span><strong class="text-white text-sm">${a.peso} kg</strong></div>
+                                        <div class="bg-gorilla-dark p-3 border border-gorilla-border"><span class="text-gorilla-textMuted block">Altura</span><strong class="text-white text-sm">${a.altura} cm</strong></div>
+                                        <div class="bg-gorilla-dark p-3 border border-gorilla-border"><span class="text-gorilla-textMuted block">% Gordura (Pollock)</span><strong class="text-gorilla-olive text-sm">${a.gorduraPerc}%</strong></div>
+                                        <div class="bg-gorilla-dark p-3 border border-gorilla-border"><span class="text-gorilla-textMuted block">Soma 7 Dobras</span><strong class="text-white text-sm">${(a.dobra_torax || 0) + (a.dobra_subescapular || 0)} mm</strong></div>
+                                    </div>
                                 </div>`).join('')}
                         </div>`;
-
-                    // Renderiza gráfico de avaliações
-                    setTimeout(() => {
-                        let ctx = document.getElementById('graficoAvaliacoes')?.getContext('2d');
-                        if(ctx) {
-                            if(window.chartAval) window.chartAval.destroy();
-                            let labels = avals.map(a => a.data);
-                            let pesos = avals.map(a => a.peso);
-                            let gorduras = avals.map(a => a.gordura);
-                            window.chartAval = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: labels,
-                                    datasets: [
-                                        { label: 'Peso (kg)', data: pesos, borderColor: '#657338', backgroundColor: '#657338', tension: 0.2 },
-                                        { label: '% Gordura', data: gorduras, borderColor: '#f97316', backgroundColor: '#f97316', tension: 0.2 }
-                                    ]
-                                },
-                                options: { responsive: true, plugins: { legend: { labels: { color: '#ffffff', font: { family: 'Montserrat' } } } }, scales: { x: { ticks: { color: '#999' } }, y: { ticks: { color: '#999' } } } }
-                            });
-                        }
-                    }, 100);
                 });
             });
         }
 
-        // GRÁFICO DE EVOLUÇÃO DE CARGA (EXCLUSIVO ALUNO)
-        window.renderizarGraficoEvolucaoCarga = function() {
-            let ctx = document.getElementById('graficoEvolucaoCarga')?.getContext('2d');
-            if(!ctx) return;
-            if(window.chartEvol) window.chartEvol.destroy();
-            
-            // Dados simulados de evolução de carga do aluno logado para demonstração do gráfico
-            window.chartEvol = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4 (Atual)'],
-                    datasets: [{
-                        label: 'Carga Média Registrada nos Exercícios (kg)',
-                        data: [35, 38, 42, 47],
-                        backgroundColor: '#657338',
-                        borderColor: '#798845',
-                        borderWidth: 1
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { labels: { color: '#ffffff', font: { family: 'Montserrat' } } } }, scales: { x: { ticks: { color: '#999' } }, y: { ticks: { color: '#999' } } } }
+        // GRÁFICOS SEPARADOS POR EXERCÍCIO (MINHA EVOLUÇÃO)
+        window.renderizarGraficosEvolucaoPorExercicio = function() {
+            const container = document.getElementById('container-graficos-exercicios');
+            let alunoId = localStorage.getItem('gorilla_aluno_id');
+            let userEmail = localStorage.getItem('gorilla_user_email');
+
+            onSnapshot(collection(db, "alunos"), (alunosSnap) => {
+                if(!alunoId) {
+                    alunosSnap.forEach(d => { if(d.data().email === userEmail) alunoId = d.id; });
+                }
+
+                let historico = JSON.parse(localStorage.getItem('gorilla_historico_cargas')) || {};
+                let dadosAluno = historico[alunoId] || {};
+
+                let exerciciosNomes = Object.keys(dadosAluno);
+                if(!exerciciosNomes.length) {
+                    container.innerHTML = '<div class="bg-gorilla-card p-6 rounded-none border border-gorilla-border text-center text-xs text-gorilla-textMuted uppercase font-bold md:col-span-2">Ainda não há registros de carga nos treinos. Preencha as cargas no seu portal de treino para gerar os gráficos!</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                exerciciosNomes.forEach((exNome, index) => {
+                    let canvasId = `graficoEx_${index}`;
+                    container.innerHTML += `
+                        <div class="bg-gorilla-card border border-gorilla-border p-5 rounded-none neon-box-olive space-y-3">
+                            <h3 class="font-extrabold uppercase text-white text-sm tracking-tight">${exNome}</h3>
+                            <canvas id="${canvasId}" class="w-full h-60"></canvas>
+                        </div>`;
+                });
+
+                setTimeout(() => {
+                    exerciciosNomes.forEach((exNome, index) => {
+                        let canvasId = `graficoEx_${index}`;
+                        let ctx = document.getElementById(canvasId)?.getContext('2d');
+                        if(ctx) {
+                            let regList = dadosAluno[exNome] || [];
+                            let labels = regList.map(r => r.data);
+                            let cargas = regList.map(r => r.carga);
+
+                            new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: 'Carga (kg)',
+                                        data: cargas,
+                                        borderColor: '#657338',
+                                        backgroundColor: 'rgba(101, 115, 56, 0.2)',
+                                        borderWidth: 2,
+                                        tension: 0.2,
+                                        fill: true
+                                    }]
+                                },
+                                options: { responsive: true, plugins: { legend: { labels: { color: '#ffffff', font: { family: 'Montserrat' } } } }, scales: { x: { ticks: { color: '#999' } }, y: { ticks: { color: '#999' } } } }
+                            });
+                        }
+                    });
+                }, 100);
             });
         }
 
