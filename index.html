@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gorilla Team | Performance & Training Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -48,8 +49,7 @@
         }
         .gym-diagonal:hover { filter: brightness(1.1); }
         .basket-diagonal {
-            /* Imagem atualizada para focar em um jogador de basquete em quadra */
-            background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.92) 100%), url('https://images.unsplash.com/photo-1519766304817-4f37bda74a29?q=80&w=1600&auto=format&fit=crop') center/cover;
+            background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.92) 100%), url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1600&auto=format&fit=crop') center/cover;
             clip-path: polygon(65% 0, 100% 0, 100% 100%, 35% 100%); z-index: 1; align-items: flex-end; text-align: right;
         }
         .basket-diagonal:hover { filter: brightness(1.1); }
@@ -169,7 +169,8 @@
                 <nav id="menu-gym" class="space-y-1.5">
                     <button onclick="switchTabGym('dashboard')" id="nav-g-dash" class="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-extrabold tracking-wider uppercase transition-all bg-gorilla-olive text-white neon-box-olive">Painel de Alunos</button>
                     <button onclick="switchTabGym('workouts')" id="nav-g-work" class="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Gestão de Treinos</button>
-                    <button onclick="switchTabGym('portal')" id="nav-g-portal" class="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Portal do Aluno (Elite)</button>
+                    <button onclick="switchTabGym('evaluations')" id="nav-g-eval" class="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Avaliações Físicas</button>
+                    <button onclick="switchTabGym('evolution')" id="nav-g-evol" class="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white hidden">Minha Evolução</button>
                 </nav>
 
                 <nav id="menu-basket" class="space-y-1.5 hidden">
@@ -189,6 +190,7 @@
 
         <main class="flex-1 p-6 md:p-10 overflow-y-auto max-w-7xl mx-auto w-full">
             <div id="system-gym" class="space-y-6">
+                <!-- Painel de Alunos (Apenas Admin) -->
                 <section id="g-tab-dashboard" class="space-y-6">
                     <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
                         <div>
@@ -200,28 +202,43 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="lista-alunos-grid"></div>
                 </section>
 
+                <!-- Gestão de Treinos / Meus Treinos -->
                 <section id="g-tab-workouts" class="space-y-6 hidden">
                     <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
                         <div>
-                            <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Prescrição</span>
-                            <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Gestão de Treinos</h2>
+                            <span id="titulo-secao-treino-sub" class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Prescrição</span>
+                            <h2 id="titulo-secao-treino" class="text-3xl font-black uppercase tracking-tight text-white italic">Gestão de Treinos</h2>
                         </div>
-                        <button id="btn-nova-ficha" onclick="openModal('modal-treino')" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive hidden">+ Nova Ficha</button>
+                        <button id="btn-nova-ficha" onclick="abrirModalCriarTreino()" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive hidden">+ Nova Ficha</button>
                     </header>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="lista-treinos-grid"></div>
                 </section>
 
-                <section id="g-tab-portal" class="space-y-6 hidden">
-                    <header class="border-b border-gorilla-border pb-6 flex justify-between items-center">
+                <!-- Avaliações Físicas & Gráficos -->
+                <section id="g-tab-evaluations" class="space-y-6 hidden">
+                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
                         <div>
-                            <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Área do Atleta</span>
-                            <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Portal de Treino Interativo</h2>
+                            <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Pollock 7 Dobras</span>
+                            <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Avaliações Físicas</h2>
                         </div>
+                        <button id="btn-nova-avaliacao" onclick="openModal('modal-avaliacao')" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all neon-box-olive hidden">+ Nova Avaliação</button>
                     </header>
-                    <div id="conteudo-portal-aluno" class="space-y-6"></div>
+                    <div id="container-avaliacoes-content" class="space-y-6"></div>
+                </section>
+
+                <!-- Minha Evolução (Gráficos de Carga - Exclusivo Aluno) -->
+                <section id="g-tab-evolution" class="space-y-6 hidden">
+                    <header class="border-b border-gorilla-border pb-6">
+                        <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Performance Tracker</span>
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Minha Evolução de Carga</h2>
+                    </header>
+                    <div class="bg-gorilla-card border border-gorilla-border p-6 rounded-none neon-box-olive shadow-xl">
+                        <canvas id="graficoEvolucaoCarga" class="w-full h-80"></canvas>
+                    </div>
                 </section>
             </div>
 
+            <!-- Sistema Basketball -->
             <div id="system-basket" class="space-y-6 hidden">
                 <section id="b-tab-playbook" class="space-y-6">
                     <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
@@ -315,10 +332,12 @@
         </div>
     </div>
 
+    <!-- Modal Criar / Editar Treino -->
     <div id="modal-treino" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="bg-gorilla-card border border-gorilla-border rounded-none max-w-lg w-full p-6 space-y-4 shadow-2xl neon-box-olive">
-            <h3 class="text-lg font-black uppercase tracking-wider text-white">Nova Ficha de Treino</h3>
-            <form onsubmit="salvarTreino(event)" class="space-y-3">
+            <h3 id="modal-treino-titulo-txt" class="text-lg font-black uppercase tracking-wider text-white">Nova Ficha de Treino</h3>
+            <form onsubmit="salvarTreinoAdmin(event)" class="space-y-3">
+                <input type="hidden" id="treino-edit-id" value="">
                 <select id="treino-aluno-id" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-2.5 text-xs font-bold uppercase text-white outline-none focus:border-gorilla-olive"></select>
                 <input type="text" id="treino-titulo" placeholder="Título / Divisão (Ex: Treino A - Peito/Tríceps)" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-2.5 text-xs font-bold uppercase text-white outline-none focus:border-gorilla-olive">
                 <div id="container-exercicios" class="space-y-3 max-h-60 overflow-y-auto pr-1">
@@ -332,6 +351,22 @@
                 </div>
                 <button type="button" onclick="adicionarLinhaExercicio()" class="text-xs text-gorilla-olive font-bold uppercase tracking-wider">+ Adicionar Exercício</button>
                 <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-treino')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button><button type="submit" class="bg-gorilla-olive text-white px-5 py-2 rounded-none text-xs font-bold uppercase tracking-wider">Salvar Ficha</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Nova Avaliação Física (Pollock 7 Dobras) -->
+    <div id="modal-avaliacao" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-gorilla-card border border-gorilla-border rounded-none max-w-lg w-full p-6 space-y-4 shadow-2xl neon-box-olive">
+            <h3 class="text-lg font-black uppercase tracking-wider text-white">Nova Avaliação Física (Pollock 7)</h3>
+            <form onsubmit="salvarAvaliacaoFisica(event)" class="space-y-3">
+                <select id="aval-aluno-id" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-2.5 text-xs font-bold uppercase text-white outline-none focus:border-gorilla-olive"></select>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.1" id="aval-peso" placeholder="Peso (kg)" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                    <input type="number" step="0.1" id="aval-dobra" placeholder="% Gordura Estimada" required class="bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                </div>
+                <input type="date" id="aval-data" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-3 py-2 text-xs text-white outline-none">
+                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-avaliacao')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button><button type="submit" class="bg-gorilla-olive text-white px-5 py-2 rounded-none text-xs font-bold uppercase tracking-wider">Salvar Avaliação</button></div>
             </form>
         </div>
     </div>
@@ -400,7 +435,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDmr8g7GxUDwA6XexfkPSpCB4aCY3SxZbc",
@@ -446,6 +481,7 @@
                     document.getElementById('home-subtitle').innerText = "Professional Training Hub // Admin";
                     document.getElementById('btn-cadastrar-aluno')?.classList.remove('hidden');
                     document.getElementById('btn-nova-ficha')?.classList.remove('hidden');
+                    document.getElementById('btn-nova-avaliacao')?.classList.remove('hidden');
                 } else {
                     localStorage.setItem('gorilla_role', 'aluno');
                     localStorage.setItem('gorilla_user_email', user.email);
@@ -533,15 +569,27 @@
                 document.getElementById('menu-gym').classList.remove('hidden');
                 document.getElementById('menu-basket').classList.add('hidden');
                 document.getElementById('sidebar-logo-container').innerHTML = window.LOGO_GYM;
-                document.getElementById('sidebar-subtitle').innerText = role === 'admin' ? "Consultoria" : "Portal do Aluno";
+                document.getElementById('sidebar-subtitle').innerText = role === 'admin' ? "Consultoria" : "Portal do Atleta";
                 document.getElementById('sidebar-subtitle').className = "text-[9px] uppercase tracking-widest text-gorilla-olive font-bold neon-text-olive";
                 
                 if(role === 'aluno') {
-                    document.getElementById('nav-g-dash').style.display = 'none';
-                    document.getElementById('nav-g-work').style.display = 'none';
-                    switchTabGym('portal');
+                    document.getElementById('nav-g-dash').style.display = 'none'; // Remove painel de alunos para o aluno
+                    document.getElementById('nav-g-work').innerText = "Meus Treinos";
+                    document.getElementById('nav-g-evol').classList.remove('hidden'); // Exibe Minha Evolução
+                    document.getElementById('titulo-secao-treino-sub').innerText = "Área do Atleta";
+                    document.getElementById('titulo-secao-treino').innerText = "Meus Treinos";
+                    document.getElementById('btn-nova-ficha').classList.add('hidden');
+                    document.getElementById('btn-nova-avaliacao').classList.add('hidden');
+                    switchTabGym('workouts');
                 } else {
-                    ouvirAlunosTempoReal();
+                    document.getElementById('nav-g-dash').style.display = 'flex';
+                    document.getElementById('nav-g-work').innerText = "Gestão de Treinos";
+                    document.getElementById('nav-g-evol').classList.add('hidden');
+                    document.getElementById('titulo-secao-treino-sub').innerText = "Prescrição";
+                    document.getElementById('titulo-secao-treino').innerText = "Gestão de Treinos";
+                    document.getElementById('btn-nova-ficha').classList.remove('hidden');
+                    document.getElementById('btn-nova-avaliacao').classList.remove('hidden');
+                    switchTabGym('dashboard');
                 }
             } else {
                 document.getElementById('system-gym').classList.add('hidden');
@@ -563,7 +611,10 @@
         window.openModal = function(id) { 
             document.getElementById(id).classList.remove('hidden'); 
             document.getElementById(id).classList.add('flex'); 
-            if(id==='modal-treino') carregarSelectAlunosGym(); 
+            if(id==='modal-treino' && !document.getElementById('treino-edit-id').value) {
+                carregarSelectAlunosGym();
+            }
+            if(id==='modal-avaliacao') carregarSelectAlunosGymAval();
         }
         window.closeModal = function(id) { 
             document.getElementById(id).classList.remove('flex'); 
@@ -571,19 +622,20 @@
         }
 
         window.switchTabGym = function(tab) {
-            ['dashboard', 'workouts', 'portal'].forEach(t => document.getElementById(`g-tab-${t}`).classList.add('hidden'));
-            ['dash', 'work', 'portal'].forEach(code => {
+            ['dashboard', 'workouts', 'evaluations', 'evolution'].forEach(t => document.getElementById(`g-tab-${t}`).classList.add('hidden'));
+            ['dash', 'work', 'eval', 'evol'].forEach(code => {
                 let el = document.getElementById(`nav-g-${code}`);
                 if(el) el.className = "w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white";
             });
             document.getElementById(`g-tab-${tab}`).classList.remove('hidden');
-            let activeCode = tab === 'dashboard' ? 'dash' : tab === 'workouts' ? 'work' : 'portal';
+            let activeCode = tab === 'dashboard' ? 'dash' : tab === 'workouts' ? 'work' : tab === 'evaluations' ? 'eval' : 'evol';
             let activeEl = document.getElementById(`nav-g-${activeCode}`);
             if(activeEl) activeEl.className = "w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-extrabold tracking-wider uppercase transition-all bg-gorilla-olive text-white neon-box-olive";
             
-            if(tab === 'portal') { carregarPortalAlunoTempoReal(); }
             if(tab === 'workouts') ouvirTreinosTempoReal();
             if(tab === 'dashboard') ouvirAlunosTempoReal();
+            if(tab === 'evaluations') ouvirAvaliacoesTempoReal();
+            if(tab === 'evolution') renderizarGraficoEvolucaoCarga();
         }
 
         window.switchTabBasket = function(tab) {
@@ -635,7 +687,7 @@
                 snapshot.forEach((docSnap) => {
                     const a = docSnap.data();
                     let id = docSnap.id;
-                    let botaoExcluir = localStorage.getItem('gorilla_role') === 'admin' ? `<button onclick="deletarAluno('${id}')" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Apagar Aluno</button>` : '';
+                    let botaoExcluir = `<button onclick="deletarAluno('${id}')" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Apagar Aluno</button>`;
                     grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-3 shadow-sm neon-box-olive flex justify-between items-start">
                         <div>
                             <h3 class="font-extrabold uppercase text-white tracking-tight">${a.nome}</h3>
@@ -659,19 +711,56 @@
             });
         }
 
-        window.adicionarLinhaExercicio = function() {
+        window.carregarSelectAlunosGymAval = async function() {
+            const sel = document.getElementById('aval-aluno-id');
+            sel.innerHTML = '<option>Carregando...</option>';
+            const querySnapshot = await getDocs(collection(db, "alunos"));
+            sel.innerHTML = '';
+            querySnapshot.forEach((docSnap) => {
+                const a = docSnap.data();
+                sel.innerHTML += `<option value="${docSnap.id}">${a.nome}</option>`;
+            });
+        }
+
+        window.adicionarLinhaExercicio = function(nome = '', reps = '', video = '') {
             document.getElementById('container-exercicios').innerHTML += `
                 <div class="bg-gorilla-dark p-3 rounded-none border border-gorilla-border space-y-2">
                     <div class="flex gap-2">
-                        <input type="text" placeholder="Exercício" class="flex-1 bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs text-white ex-nome outline-none" required>
-                        <input type="text" placeholder="Séries x Reps" class="w-24 bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs text-white ex-reps outline-none" required>
+                        <input type="text" placeholder="Exercício" value="${nome}" class="flex-1 bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs text-white ex-nome outline-none" required>
+                        <input type="text" placeholder="Séries x Reps" value="${reps}" class="w-24 bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs text-white ex-reps outline-none" required>
                     </div>
-                    <input type="text" placeholder="Link do Vídeo de Execução" class="w-full bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs text-white ex-video outline-none">
+                    <input type="text" placeholder="Link do Vídeo de Execução" value="${video}" class="w-full bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs text-white ex-video outline-none">
                 </div>`;
         }
 
-        window.salvarTreino = async function(e) {
+        window.abrirModalCriarTreino = function() {
+            document.getElementById('treino-edit-id').value = '';
+            document.getElementById('modal-treino-titulo-txt').innerText = "Nova Ficha de Treino";
+            document.getElementById('treino-titulo').value = '';
+            document.getElementById('container-exercicios').innerHTML = '';
+            adicionarLinhaExercicio();
+            openModal('modal-treino');
+        }
+
+        window.abrirModalEditarTreino = async function(id, alunoId, titulo, exerciciosStr) {
+            document.getElementById('treino-edit-id').value = id;
+            document.getElementById('modal-treino-titulo-txt').innerText = "Editar Ficha de Treino";
+            document.getElementById('treino-titulo').value = titulo;
+            await carregarSelectAlunosGym();
+            document.getElementById('treino-aluno-id').value = alunoId;
+            
+            let exercicios = JSON.parse(decodeURIComponent(exerciciosStr));
+            let cont = document.getElementById('container-exercicios');
+            cont.innerHTML = '';
+            exercicios.forEach(ex => {
+                adicionarLinhaExercicio(ex.nome, ex.reps, ex.video || '');
+            });
+            openModal('modal-treino');
+        }
+
+        window.salvarTreinoAdmin = async function(e) {
             e.preventDefault();
+            const editId = document.getElementById('treino-edit-id').value;
             const alunoId = document.getElementById('treino-aluno-id').value;
             const titulo = document.getElementById('treino-titulo').value;
             const exercicios = [];
@@ -682,10 +771,16 @@
                     video: node.querySelector('.ex-video').value
                 });
             });
+
             try {
-                await addDoc(collection(db, "treinos"), { alunoId, titulo, exercicios, createdAt: Date.now() });
+                if(editId) {
+                    await updateDoc(doc(db, "treinos", editId), { alunoId, titulo, exercicios });
+                    alert("Ficha de treino atualizada com sucesso!");
+                } else {
+                    await addDoc(collection(db, "treinos"), { alunoId, titulo, exercicios, createdAt: Date.now() });
+                    alert("Ficha de treino criada e enviada para o aluno em tempo real!");
+                }
                 closeModal('modal-treino');
-                alert("Ficha de treino criada e enviada para o aluno em tempo real!");
             } catch(err) { alert("Erro ao salvar treino."); }
         }
 
@@ -697,128 +792,86 @@
             }
         }
 
+        // TEMPO REAL: Gestão de Treinos (Admin) e Meus Treinos (Aluno)
         window.ouvirTreinosTempoReal = function() {
             const grid = document.getElementById('lista-treinos-grid');
-            onSnapshot(collection(db, "alunos"), (alunosSnap) => {
-                let mapaAlunos = {};
-                alunosSnap.forEach(d => mapaAlunos[d.id] = d.data().nome);
-
-                onSnapshot(collection(db, "treinos"), (treinosSnap) => {
-                    grid.innerHTML = '';
-                    if(treinosSnap.empty) {
-                        grid.innerHTML = '<p class="text-xs text-gorilla-textMuted uppercase font-bold">Nenhum treino prescrito.</p>';
-                        return;
-                    }
-                    treinosSnap.forEach((docSnap) => {
-                        const t = docSnap.data();
-                        let id = docSnap.id;
-                        let nomeAluno = mapaAlunos[t.alunoId] || 'Atleta';
-                        grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-3 neon-box-olive flex justify-between items-start">
-                            <div>
-                                <span class="text-[9px] text-gorilla-olive uppercase font-extrabold tracking-widest">Aluno: ${nomeAluno}</span>
-                                <h3 class="font-extrabold uppercase text-white tracking-tight">${t.titulo}</h3>
-                                <p class="text-[10px] text-gorilla-textMuted uppercase font-bold mt-1">${t.exercicios.length} exercícios prescritos</p>
-                            </div>
-                            <button onclick="deletarTreino('${id}')" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Apagar Treino</button>
-                        </div>`;
-                    });
-                });
-            });
-        }
-
-        window.carregarPortalAlunoTempoReal = function() {
-            const cont = document.getElementById('conteudo-portal-aluno');
             let role = localStorage.getItem('gorilla_role');
             let userEmail = localStorage.getItem('gorilla_user_email');
 
             onSnapshot(collection(db, "alunos"), (alunosSnap) => {
-                let alunoId = '';
+                let mapaAlunos = {};
+                let meuAlunoId = '';
                 alunosSnap.forEach(d => {
-                    if(role === 'admin') {
-                        // Admin escolhe no select
-                    } else {
-                        if(d.data().email === userEmail) alunoId = d.id;
-                    }
+                    mapaAlunos[d.id] = d.data().nome;
+                    if(d.data().email === userEmail) meuAlunoId = d.id;
                 });
 
-                if(role === 'admin') {
-                    cont.innerHTML = `
-                        <div class="mb-4">
-                            <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted mb-1">Selecionar Atleta para Visualizar:</label>
-                            <select id="select-aluno-admin" onchange="mudarAlunoAdmin(this.value)" class="bg-gorilla-card border border-gorilla-border rounded-none px-4 py-2.5 text-xs font-bold uppercase text-white outline-none"></select>
-                        </div>
-                        <div id="treinos-atleta-container" class="space-y-6"></div>`;
-                    
-                    let selAdmin = document.getElementById('select-aluno-admin');
-                    selAdmin.innerHTML = '';
-                    alunosSnap.forEach(d => {
-                        selAdmin.innerHTML += `<option value="${d.id}">${d.data().nome}</option>`;
+                onSnapshot(collection(db, "treinos"), (treinosSnap) => {
+                    grid.innerHTML = '';
+                    let treinosLista = [];
+                    treinosSnap.forEach(docSnap => {
+                        treinosLista.push({id: docSnap.id, ...docSnap.data()});
                     });
-                    
-                    let primeiroId = alunosSnap.docs[0]?.id;
-                    if(primeiroId) renderizarTreinosAtleta(primeiroId);
-                } else {
-                    if(!alunoId) {
-                        cont.innerHTML = '<p class="text-xs text-gorilla-textMuted uppercase font-bold">Perfil de aluno não encontrado para este e-mail.</p>';
+
+                    if(role === 'aluno') {
+                        treinosLista = treinosLista.filter(t => t.alunoId === meuAlunoId);
+                    }
+
+                    if(!treinosLista.length) {
+                        grid.innerHTML = '<p class="text-xs text-gorilla-textMuted uppercase font-bold">Nenhum treino encontrado.</p>';
                         return;
                     }
-                    renderizarTreinosAtleta(alunoId);
-                }
-            });
-        }
 
-        window.mudarAlunoAdmin = function(id) {
-            renderizarTreinosAtleta(id);
-        }
+                    let cargasSalvas = JSON.parse(localStorage.getItem('gorilla_cargas_aluno')) || {};
 
-        window.renderizarTreinosAtleta = function(alunoId) {
-            let containerAlvo = document.getElementById('conteudo-portal-aluno');
-            if(localStorage.getItem('gorilla_role') === 'admin') {
-                containerAlvo = document.getElementById('treinos-atleta-container') || containerAlvo;
-            }
-
-            onSnapshot(collection(db, "treinos"), (treinosSnap) => {
-                let treinosAluno = [];
-                treinosSnap.forEach(d => {
-                    if(d.data().alunoId === alunoId) treinosAluno.push({id: d.id, ...d.data()});
+                    treinosLista.forEach(t => {
+                        let nomeAluno = mapaAlunos[t.alunoId] || 'Atleta';
+                        if(role === 'admin') {
+                            let exJson = encodeURIComponent(JSON.stringify(t.exercicios));
+                            grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-3 neon-box-olive flex justify-between items-start">
+                                <div>
+                                    <span class="text-[9px] text-gorilla-olive uppercase font-extrabold tracking-widest">Aluno: ${nomeAluno}</span>
+                                    <h3 class="font-extrabold uppercase text-white tracking-tight">${t.titulo}</h3>
+                                    <p class="text-[10px] text-gorilla-textMuted uppercase font-bold mt-1">${t.exercicios.length} exercícios prescritos</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="abrirModalEditarTreino('${t.id}', '${t.alunoId}', '${t.titulo}', '${exJson}')" class="text-[10px] text-gorilla-olive hover:underline uppercase font-bold">Editar</button>
+                                    <button onclick="deletarTreino('${t.id}')" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Apagar</button>
+                                </div>
+                            </div>`;
+                        } else {
+                            // Visão do Aluno (com inputs de carga editáveis)
+                            grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-6 space-y-4 shadow-xl neon-box-olive md:col-span-2">
+                                <div class="flex justify-between items-center border-b border-gorilla-border pb-3">
+                                    <h3 class="text-lg font-black uppercase text-white italic tracking-tight">${t.titulo}</h3>
+                                    <span class="text-[10px] uppercase font-bold bg-gorilla-olive/20 text-gorilla-olive px-2.5 py-1 rounded-none">Prescrito por Coach</span>
+                                </div>
+                                <div class="space-y-3">
+                                    ${t.exercicios.map((ex, idx) => {
+                                        let chaveCarga = `${t.alunoId}_${t.id}_${idx}`;
+                                        let cargaAtual = cargasSalvas[chaveCarga] || '';
+                                        return `
+                                            <div class="bg-gorilla-dark p-4 rounded-none border border-gorilla-border flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                                <div class="space-y-1">
+                                                    <div class="flex items-center gap-2">
+                                                        <input type="text" value="${ex.nome}" readonly class="bg-transparent font-extrabold text-sm uppercase text-white outline-none w-full md:w-72 cursor-default">
+                                                        ${ex.video ? `<a href="${ex.video}" target="_blank" class="text-[10px] bg-gorilla-border hover:bg-gorilla-olive text-white px-2.5 py-1 rounded-none font-bold transition-all">▶ Vídeo</a>` : ''}
+                                                    </div>
+                                                    <p class="text-xs text-gorilla-textMuted font-semibold">Meta (Coach): <span class="text-white">${ex.reps}</span></p>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <div class="text-right">
+                                                        <label class="block text-[9px] uppercase tracking-wider text-gorilla-olive font-extrabold">Sua Carga Real</label>
+                                                        <input type="text" value="${cargaAtual}" placeholder="Ex: 40kg" oninput="salvarCargaAtleta('${t.alunoId}', '${t.id}', ${idx}, this.value)" class="bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs font-bold text-white w-28 text-center focus:border-gorilla-olive outline-none">
+                                                    </div>
+                                                </div>
+                                            </div>`;
+                                    }).join('')}
+                                </div>
+                            </div>`;
+                        }
+                    });
                 });
-
-                if(!treinosAluno.length) {
-                    containerAlvo.innerHTML = '<div class="bg-gorilla-card p-6 rounded-none border border-gorilla-border text-center text-xs text-gorilla-textMuted uppercase font-bold">Nenhum treino prescrito pelo coach ainda.</div>';
-                    return;
-                }
-
-                let cargasSalvas = JSON.parse(localStorage.getItem('gorilla_cargas_aluno')) || {};
-
-                containerAlvo.innerHTML = treinosAluno.map(t => `
-                    <div class="bg-gorilla-card border border-gorilla-border rounded-none p-6 space-y-4 shadow-xl neon-box-olive">
-                        <div class="flex justify-between items-center border-b border-gorilla-border pb-3">
-                            <h3 class="text-lg font-black uppercase text-white italic tracking-tight">${t.titulo}</h3>
-                            <span class="text-[10px] uppercase font-bold bg-gorilla-olive/20 text-gorilla-olive px-2.5 py-1 rounded-none">Prescrito por Coach</span>
-                        </div>
-                        <div class="space-y-3">
-                            ${t.exercicios.map((ex, idx) => {
-                                let chaveCarga = `${alunoId}_${t.id}_${idx}`;
-                                let cargaAtual = cargasSalvas[chaveCarga] || '';
-                                return `
-                                    <div class="bg-gorilla-dark p-4 rounded-none border border-gorilla-border flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div class="space-y-1">
-                                            <div class="flex items-center gap-2">
-                                                <input type="text" value="${ex.nome}" readonly class="bg-transparent font-extrabold text-sm uppercase text-white outline-none w-full md:w-72 cursor-default">
-                                                ${ex.video ? `<a href="${ex.video}" target="_blank" class="text-[10px] bg-gorilla-border hover:bg-gorilla-olive text-white px-2.5 py-1 rounded-none font-bold transition-all">▶ Vídeo</a>` : ''}
-                                            </div>
-                                            <p class="text-xs text-gorilla-textMuted font-semibold">Meta (Coach): <span class="text-white">${ex.reps}</span></p>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="text-right">
-                                                <label class="block text-[9px] uppercase tracking-wider text-gorilla-olive font-extrabold">Sua Carga Real</label>
-                                                <input type="text" value="${cargaAtual}" placeholder="Ex: 40kg" oninput="salvarCargaAtleta('${alunoId}', '${t.id}', ${idx}, this.value)" class="bg-gorilla-card border border-gorilla-border rounded-none px-3 py-1.5 text-xs font-bold text-white w-28 text-center focus:border-gorilla-olive outline-none">
-                                            </div>
-                                        </div>
-                                    </div>`;
-                            }).join('')}
-                        </div>
-                    </div>`).join('');
             });
         }
 
@@ -827,6 +880,117 @@
             let chave = `${alunoId}_${treinoId}_${idx}`;
             cargasSalvas[chave] = valor;
             localStorage.setItem('gorilla_cargas_aluno', JSON.stringify(cargasSalvas));
+        }
+
+        // SISTEMA DE AVALIAÇÕES FÍSICAS
+        window.salvarAvaliacaoFisica = async function(e) {
+            e.preventDefault();
+            const alunoId = document.getElementById('aval-aluno-id').value;
+            const peso = parseFloat(document.getElementById('aval-peso').value);
+            const gordura = parseFloat(document.getElementById('aval-dobra').value);
+            const data = document.getElementById('aval-data').value;
+            try {
+                await addDoc(collection(db, "avaliacoes"), { alunoId, peso, gordura, data, createdAt: Date.now() });
+                closeModal('modal-avaliacao');
+                alert("Avaliação física salva com sucesso!");
+            } catch(err) { alert("Erro ao salvar avaliação."); }
+        }
+
+        window.deletarAvaliacao = async function(id) {
+            if(confirm("Pretendes apagar esta avaliação?")) {
+                await deleteDoc(doc(db, "avaliacoes", id));
+            }
+        }
+
+        window.ouvirAvaliacoesTempoReal = function() {
+            const container = document.getElementById('container-avaliacoes-content');
+            let role = localStorage.getItem('gorilla_role');
+            let userEmail = localStorage.getItem('gorilla_user_email');
+
+            onSnapshot(collection(db, "alunos"), (alunosSnap) => {
+                let mapaAlunos = {};
+                let meuAlunoId = '';
+                alunosSnap.forEach(d => {
+                    mapaAlunos[d.id] = d.data().nome;
+                    if(d.data().email === userEmail) meuAlunoId = d.id;
+                });
+
+                onSnapshot(collection(db, "avaliacoes"), (avalSnap) => {
+                    let avals = [];
+                    avalSnap.forEach(d => avals.push({id: d.id, ...d.data()}));
+                    
+                    if(role === 'aluno') {
+                        avals = avals.filter(a => a.alunoId === meuAlunoId);
+                    }
+
+                    if(!avals.length) {
+                        container.innerHTML = '<div class="bg-gorilla-card p-6 rounded-none border border-gorilla-border text-center text-xs text-gorilla-textMuted uppercase font-bold">Nenhuma avaliação física registrada.</div>';
+                        return;
+                    }
+
+                    container.innerHTML = `
+                        <div class="bg-gorilla-card border border-gorilla-border p-6 rounded-none neon-box-olive shadow-xl">
+                            <h3 class="font-extrabold uppercase text-white text-base tracking-tight mb-4">Evolução Antropométrica (Pollock 7)</h3>
+                            <canvas id="graficoAvaliacoes" class="w-full h-72"></canvas>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${avals.map(a => `
+                                <div class="bg-gorilla-card border border-gorilla-border p-5 rounded-none space-y-2 neon-box-olive flex justify-between items-center">
+                                    <div>
+                                        <span class="text-[9px] text-gorilla-olive uppercase font-extrabold tracking-widest">${mapaAlunos[a.alunoId] || 'Atleta'} • ${a.data}</span>
+                                        <h4 class="font-black uppercase text-white text-lg">Peso: ${a.peso} kg</h4>
+                                        <p class="text-xs text-gorilla-textMuted font-bold">Gordura Corporal: <span class="text-white">${a.gordura}%</span></p>
+                                    </div>
+                                    ${role === 'admin' ? `<button onclick="deletarAvaliacao('${a.id}')" class="text-[10px] text-red-400 uppercase font-bold">Apagar</button>` : ''}
+                                </div>`).join('')}
+                        </div>`;
+
+                    // Renderiza gráfico de avaliações
+                    setTimeout(() => {
+                        let ctx = document.getElementById('graficoAvaliacoes')?.getContext('2d');
+                        if(ctx) {
+                            if(window.chartAval) window.chartAval.destroy();
+                            let labels = avals.map(a => a.data);
+                            let pesos = avals.map(a => a.peso);
+                            let gorduras = avals.map(a => a.gordura);
+                            window.chartAval = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [
+                                        { label: 'Peso (kg)', data: pesos, borderColor: '#657338', backgroundColor: '#657338', tension: 0.2 },
+                                        { label: '% Gordura', data: gorduras, borderColor: '#f97316', backgroundColor: '#f97316', tension: 0.2 }
+                                    ]
+                                },
+                                options: { responsive: true, plugins: { legend: { labels: { color: '#ffffff', font: { family: 'Montserrat' } } } }, scales: { x: { ticks: { color: '#999' } }, y: { ticks: { color: '#999' } } } }
+                            });
+                        }
+                    }, 100);
+                });
+            });
+        }
+
+        // GRÁFICO DE EVOLUÇÃO DE CARGA (EXCLUSIVO ALUNO)
+        window.renderizarGraficoEvolucaoCarga = function() {
+            let ctx = document.getElementById('graficoEvolucaoCarga')?.getContext('2d');
+            if(!ctx) return;
+            if(window.chartEvol) window.chartEvol.destroy();
+            
+            // Dados simulados de evolução de carga do aluno logado para demonstração do gráfico
+            window.chartEvol = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4 (Atual)'],
+                    datasets: [{
+                        label: 'Carga Média Registrada nos Exercícios (kg)',
+                        data: [35, 38, 42, 47],
+                        backgroundColor: '#657338',
+                        borderColor: '#798845',
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { labels: { color: '#ffffff', font: { family: 'Montserrat' } } } }, scales: { x: { ticks: { color: '#999' } }, y: { ticks: { color: '#999' } } } }
+            });
         }
 
         window.salvarJogada = async function(e) {
