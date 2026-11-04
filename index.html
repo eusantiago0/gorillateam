@@ -918,7 +918,6 @@
             cargasSalvas[chave] = valor;
             localStorage.setItem('gorilla_cargas_aluno', JSON.stringify(cargasSalvas));
 
-            // Salva histórico temporal para gráficos por exercício
             let historico = JSON.parse(localStorage.getItem('gorilla_historico_cargas')) || {};
             if(!historico[alunoId]) historico[alunoId] = {};
             if(!historico[alunoId][nomeExercicio]) historico[alunoId][nomeExercicio] = [];
@@ -933,13 +932,13 @@
             localStorage.setItem('gorilla_historico_cargas', JSON.stringify(historico));
         }
 
-        // SALVAR AVALIAÇÃO FÍSICA COMPLETA (ADMIN)
+        // SALVAR AVALIAÇÃO FÍSICA COMPLETA + CÁLCULOS AVANÇADOS
         window.salvarAvaliacaoFisicaCompleta = async function(e) {
             e.preventDefault();
             const alunoId = document.getElementById('aval-aluno-id').value;
             const data = document.getElementById('aval-data').value;
             const peso = parseFloat(document.getElementById('aval-peso').value);
-            const altura = parseFloat(document.getElementById('aval-altura').value);
+            const altura = parseFloat(document.getElementById('aval-altura').value); // em cm
             
             const dobras = {
                 torax: parseFloat(document.getElementById('dobra-torax').value),
@@ -960,17 +959,33 @@
                 panturrilha: parseFloat(document.getElementById('per-panturrilha').value) || 0
             };
 
-            // Cálculo simplificado de % gordura Pollock 7 dobras (Homem)
+            // Cálculos Antropométricos
+            let alturaM = altura / 100;
+            let imc = peso / (alturaM * alturaM);
             let somaDobras = dobras.torax + dobras.subescapular + dobras.axilar + dobras.suprailiaca + dobras.abdominal + dobras.coxa + dobras.triceps;
-            let densidade = 1.112 - (0.00043499 * somaDobras) + (0.00000055 * (somaDobras * somaDobras)) - (0.00028826 * 22); // idade média 22
+            
+            // Densidade e % de gordura (Pollock 7 dobras simplificado)
+            let densidade = 1.112 - (0.00043499 * somaDobras) + (0.00000055 * (somaDobras * somaDobras)) - (0.00028826 * 22);
             let gorduraPerc = ((4.95 / densidade) - 4.5) * 100;
+            if(gorduraPerc < 3) gorduraPerc = 5;
+
+            let massaGordaKg = peso * (gorduraPerc / 100);
+            let massaMagraKg = peso - massaGordaKg;
+            
+            // % Gordura Ideal estimado (Referência saudável atlética ~12%)
+            let gorduraIdealPerc = 12.0; 
+            let pesoIdealKg = massaMagraKg / (1 - (gorduraIdealPerc / 100));
+            let idadeCorporal = Math.round(22 + (gorduraPerc > 18 ? (gorduraPerc - 18) * 0.8 : -2));
 
             try {
                 await addDoc(collection(db, "avaliacoes_completas"), {
-                    alunoId, data, peso, altura, dobras, perimetros, gorduraPerc: gorduraPerc.toFixed(1), createdAt: Date.now()
+                    alunoId, data, peso, altura, imc: imc.toFixed(1), gorduraPerc: gorduraPerc.toFixed(1),
+                    massaGordaKg: massaGordaKg.toFixed(1), massaMagraKg: massaMagraKg.toFixed(1),
+                    pesoIdealKg: pesoIdealKg.toFixed(1), gorduraIdealPerc, idadeCorporal,
+                    dobras, perimetros, createdAt: Date.now()
                 });
                 closeModal('modal-avaliacao');
-                alert("Avaliação física completa salva com sucesso!");
+                alert("Avaliação completa salva com sucesso!");
             } catch(err) { alert("Erro ao salvar avaliação física."); }
         }
 
@@ -1007,21 +1022,51 @@
                     }
 
                     container.innerHTML = `
-                        <div class="grid grid-cols-1 gap-4">
+                        <div class="grid grid-cols-1 gap-6">
                             ${avals.map(a => `
-                                <div class="bg-gorilla-card border border-gorilla-border p-6 rounded-none space-y-4 neon-box-olive">
+                                <div class="bg-gorilla-card border border-gorilla-border p-6 rounded-none space-y-4 neon-box-olive shadow-xl">
                                     <div class="flex justify-between items-center border-b border-gorilla-border pb-3">
                                         <div>
-                                            <span class="text-[9px] text-gorilla-olive uppercase font-extrabold tracking-widest">Aluno: ${mapaAlunos[a.alunoId] || 'Atleta'}</span>
-                                            <h3 class="font-black uppercase text-white text-base">Avaliação em ${a.data}</h3>
+                                            <span class="text-[9px] text-gorilla-olive uppercase font-extrabold tracking-widest">Atleta: ${mapaAlunos[a.alunoId] || 'Aluno'}</span>
+                                            <h3 class="font-black uppercase text-white text-lg italic tracking-tight">Avaliação Antropométrica — ${a.data}</h3>
                                         </div>
-                                        ${role === 'admin' ? `<button onclick="deletarAvaliacaoCompleta('${a.id}')" class="text-[10px] text-red-400 uppercase font-bold">Apagar</button>` : ''}
+                                        ${role === 'admin' ? `<button onclick="deletarAvaliacaoCompleta('${a.id}')" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Apagar</button>` : ''}
                                     </div>
-                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                                        <div class="bg-gorilla-dark p-3 border border-gorilla-border"><span class="text-gorilla-textMuted block">Peso</span><strong class="text-white text-sm">${a.peso} kg</strong></div>
-                                        <div class="bg-gorilla-dark p-3 border border-gorilla-border"><span class="text-gorilla-textMuted block">Altura</span><strong class="text-white text-sm">${a.altura} cm</strong></div>
-                                        <div class="bg-gorilla-dark p-3 border border-gorilla-border"><span class="text-gorilla-textMuted block">% Gordura (Pollock)</span><strong class="text-gorilla-olive text-sm">${a.gorduraPerc}%</strong></div>
-                                        <div class="bg-gorilla-dark p-3 border border-gorilla-border"><span class="text-gorilla-textMuted block">Soma 7 Dobras</span><strong class="text-white text-sm">${(a.dobra_torax || 0) + (a.dobra_subescapular || 0)} mm</strong></div>
+
+                                    <!-- Grid de Resultados Detalhados -->
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <div class="bg-gorilla-dark p-3.5 border border-gorilla-border">
+                                            <span class="text-[9px] uppercase tracking-wider text-gorilla-textMuted font-bold block">Peso Atual</span>
+                                            <span class="text-white text-base font-black">${a.peso} kg</span>
+                                        </div>
+                                        <div class="bg-gorilla-dark p-3.5 border border-gorilla-border">
+                                            <span class="text-[9px] uppercase tracking-wider text-gorilla-textMuted font-bold block">IMC</span>
+                                            <span class="text-white text-base font-black">${a.imc} <span class="text-[10px] text-gorilla-olive font-normal">(${a.imc < 25 ? 'Normal' : 'Sobrepeso'})</span></span>
+                                        </div>
+                                        <div class="bg-gorilla-dark p-3.5 border border-gorilla-border">
+                                            <span class="text-[9px] uppercase tracking-wider text-gorilla-textMuted font-bold block">% Gordura Atual</span>
+                                            <span class="text-gorilla-orange text-base font-black">${a.gorduraPerc}%</span>
+                                        </div>
+                                        <div class="bg-gorilla-dark p-3.5 border border-gorilla-border">
+                                            <span class="text-[9px] uppercase tracking-wider text-gorilla-textMuted font-bold block">% Gordura Ideal</span>
+                                            <span class="text-gorilla-olive text-base font-black">${a.gorduraIdealPerc}%</span>
+                                        </div>
+                                        <div class="bg-gorilla-dark p-3.5 border border-gorilla-border">
+                                            <span class="text-[9px] uppercase tracking-wider text-gorilla-textMuted font-bold block">Massa Magra</span>
+                                            <span class="text-white text-base font-black">${a.massaMagraKg} kg</span>
+                                        </div>
+                                        <div class="bg-gorilla-dark p-3.5 border border-gorilla-border">
+                                            <span class="text-[9px] uppercase tracking-wider text-gorilla-textMuted font-bold block">Massa Gorda</span>
+                                            <span class="text-white text-base font-black">${a.massaGordaKg} kg</span>
+                                        </div>
+                                        <div class="bg-gorilla-dark p-3.5 border border-gorilla-border">
+                                            <span class="text-[9px] uppercase tracking-wider text-gorilla-textMuted font-bold block">Peso Ideal Estatura</span>
+                                            <span class="text-white text-base font-black">${a.pesoIdealKg} kg</span>
+                                        </div>
+                                        <div class="bg-gorilla-dark p-3.5 border border-gorilla-border">
+                                            <span class="text-[9px] uppercase tracking-wider text-gorilla-textMuted font-bold block">Idade Corporal</span>
+                                            <span class="text-gorilla-olive text-base font-black">${a.idadeCorporal} anos</span>
+                                        </div>
                                     </div>
                                 </div>`).join('')}
                         </div>`;
@@ -1029,7 +1074,6 @@
             });
         }
 
-        // GRÁFICOS SEPARADOS POR EXERCÍCIO (MINHA EVOLUÇÃO)
         window.renderizarGraficosEvolucaoPorExercicio = function() {
             const container = document.getElementById('container-graficos-exercicios');
             let alunoId = localStorage.getItem('gorilla_aluno_id');
