@@ -32,17 +32,44 @@
         ::-webkit-scrollbar-track { background: #0a0a0a; }
         ::-webkit-scrollbar-thumb { background: #222222; border-radius: 3px; }
         
-        .split-section { position: relative; width: 100vw; height: 100vh; display: flex; overflow: hidden; }
-        .split-side { position: relative; height: 100%; width: 50%; transition: width 0.6s cubic-bezier(0.77, 0, 0.175, 1); overflow: hidden; cursor: pointer; }
-        .split-side:hover { width: 70%; }
-        .split-side:not(:hover) { width: 30%; }
-        @media (max-width: 768px) {
-            .split-section { flex-direction: column; height: auto; min-height: 100vh; }
-            .split-side { width: 100% !important; height: 50vh; }
+        /* Divisão Diagonal Real por Clip-Path (Estática e Industrial) */
+        .split-diagonal { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+        
+        .diagonal-side {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 4rem;
+            cursor: pointer;
+            transition: filter 0.3s ease;
         }
 
-        .gym-bg { background: linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.85) 100%), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600&auto=format&fit=crop') center/cover; }
-        .basket-bg { background: linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.85) 100%), url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1600&auto=format&fit=crop') center/cover; }
+        .gym-diagonal {
+            background: linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.9) 100%), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600&auto=format&fit=crop') center/cover;
+            clip-path: polygon(0 0, 65% 0, 35% 100%, 0 100%);
+            z-index: 2;
+        }
+        .gym-diagonal:hover { filter: brightness(1.15); }
+
+        .basket-diagonal {
+            background: linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.9) 100%), url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1600&auto=format&fit=crop') center/cover;
+            clip-path: polygon(65% 0, 100% 0, 100% 100%, 35% 100%);
+            z-index: 1;
+            align-items: flex-end;
+            text-align: right;
+        }
+        .basket-diagonal:hover { filter: brightness(1.15); }
+
+        @media (max-width: 768px) {
+            .split-diagonal { height: auto; min-height: 100vh; display: flex; flex-direction: column; }
+            .diagonal-side { position: relative; width: 100% !important; height: 50vh; clip-path: none !important; padding: 2rem; text-align: left !important; align-items: flex-start !important; }
+        }
+
         .court-bg { background: linear-gradient(135deg, #121212 0%, #1a1a1a 100%); border: 1px solid #333; position: relative; overflow: hidden; }
         .player-token { transition: transform 0.2s ease; cursor: grab; }
     </style>
@@ -80,8 +107,8 @@
         </div>
     </div>
 
-    <!-- TELA DE SELEÇÃO INICIAL (HOME DO PORTAL PARA O ADMIN) -->
-    <div id="view-home" class="split-section bg-gorilla-dark hidden">
+    <!-- TELA DE SELEÇÃO INICIAL (HOME COM CORTE DIAGONAL ESTÁTICO) -->
+    <div id="view-home" class="split-diagonal bg-gorilla-dark hidden">
         <div class="absolute top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center flex items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white italic drop-shadow-lg">Gorilla Team<span class="text-gorilla-orange">.pro</span></h1>
@@ -90,30 +117,30 @@
             <button onclick="logout()" class="pointer-events-auto bg-gorilla-card border border-gorilla-border hover:border-red-500 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase">Sair</button>
         </div>
 
-        <div onclick="entrarSistema('gym')" class="split-side gym-side gym-bg flex flex-col justify-end p-8 md:p-16 group">
-            <div class="absolute inset-0 bg-gorilla-olive/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div class="relative z-10 space-y-3">
+        <!-- LADO ESQUERDO: MUSCULAÇÃO (Corte Diagonal) -->
+        <div onclick="entrarSistema('gym')" class="diagonal-side gym-diagonal">
+            <div class="max-w-md space-y-3">
                 <span class="text-xs uppercase tracking-[0.3em] text-gorilla-olive font-black">01 // Consultoria</span>
                 <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white italic">Musculação</h2>
-                <p class="text-xs md:text-sm text-gorilla-textMuted max-w-sm leading-relaxed opacity-80 group-hover:opacity-100">
+                <p class="text-xs md:text-sm text-gorilla-textMuted leading-relaxed">
                     Gestão de atletas, Pollock 7 dobras, diário de cargas interativo e prescrição de alta performance.
                 </p>
-                <div class="pt-4 flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
-                    Acessar Consultoria <span class="text-gorilla-olive group-hover:translate-x-2 transition-transform">→</span>
+                <div class="pt-2 flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
+                    Acessar Consultoria <span class="text-gorilla-olive">→</span>
                 </div>
             </div>
         </div>
 
-        <div onclick="entrarSistema('basket')" class="split-side basket-side basket-bg flex flex-col justify-end p-8 md:p-16 group">
-            <div class="absolute inset-0 bg-gorilla-orange/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div class="relative z-10 space-y-3">
+        <!-- LADO DIREITO: BASQUETE (Corte Diagonal) -->
+        <div onclick="entrarSistema('basket')" class="diagonal-side basket-diagonal">
+            <div class="max-w-md space-y-3">
                 <span class="text-xs uppercase tracking-[0.3em] text-gorilla-orange font-black">02 // Quadra</span>
                 <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white italic">Basketball</h2>
-                <p class="text-xs md:text-sm text-gorilla-textMuted max-w-sm leading-relaxed opacity-80 group-hover:opacity-100">
+                <p class="text-xs md:text-sm text-gorilla-textMuted leading-relaxed">
                     Playbook digital, prancheta tática animada, scout de partidas e controle de carga RPE.
                 </p>
-                <div class="pt-4 flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
-                    Acessar Playbook <span class="text-gorilla-orange group-hover:translate-x-2 transition-transform">→</span>
+                <div class="pt-2 flex items-center justify-end gap-2 text-xs font-bold text-white uppercase tracking-wider">
+                    <span class="text-gorilla-orange">←</span> Acessar Playbook
                 </div>
             </div>
         </div>
@@ -397,7 +424,6 @@
             localStorage.setItem('gorilla_basket_jogos', JSON.stringify(dbJogos));
         }
 
-        // Sistema de Login Simulado
         function fazerLogin(e) {
             e.preventDefault();
             let email = document.getElementById('login-email').value;
@@ -437,16 +463,12 @@
         function abrirPainelAlunoRestrito() {
             document.getElementById('view-login').classList.add('hidden');
             document.getElementById('view-app').classList.remove('hidden');
-            // Oculta módulos de admin e deixa direto na visão de treino do aluno
             document.getElementById('menu-gym').classList.remove('hidden');
             document.getElementById('menu-basket').classList.add('hidden');
             document.getElementById('system-gym').classList.remove('hidden');
             document.getElementById('system-basket').classList.add('hidden');
-            document.getElementById('btn-voltar-modulo').style.display = 'none'; // Aluno não troca de módulo
-            
-            // Abre direto a aba de portal do aluno travada no perfil dele
+            document.getElementById('btn-voltar-modulo').style.display = 'none';
             switchTabGym('portal');
-            // Esconde o seletor para que o aluno só veja o treino dele
             document.getElementById('select-aluno-portal').style.display = 'none';
         }
 
@@ -572,7 +594,7 @@
             let alunoId;
             
             if(role === 'aluno') {
-                alunoId = dbAlunos[0] ? dbAlunos[0].id : 1; // Puxa o primeiro aluno para teste
+                alunoId = dbAlunos[0] ? dbAlunos[0].id : 1;
             } else {
                 alunoId = parseInt(document.getElementById('select-aluno-portal').value);
             }
