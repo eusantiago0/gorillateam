@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gorilla Team | Performance & Training Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gorilla: {
+                            dark: '#0a0a0a',
+                            card: '#121212',
+                            border: '#222222',
+                            olive: '#657338',
+                            oliveHover: '#798845',
+                            orange: '#f97316',
+                            orangeHover: '#ea580c',
+                            textMuted: '#888888'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,900&display=swap');
+        body { font-family: 'Montserrat', sans-serif; background-color: #0a0a0a; color: #f3f4f6; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #222222; border-radius: 3px; }
+        
+        .split-section { position: relative; width: 100vw; height: 100vh; display: flex; overflow: hidden; }
+        .split-side { position: relative; height: 100%; width: 50%; transition: width 0.6s cubic-bezier(0.77, 0, 0.175, 1); overflow: hidden; cursor: pointer; }
+        .split-side:hover { width: 70%; }
+        .split-side:not(:hover) { width: 30%; }
+        @media (max-width: 768px) {
+            .split-section { flex-direction: column; height: auto; min-height: 100vh; }
+            .split-side { width: 100% !important; height: 50vh; }
+        }
+
+        .gym-bg { background: linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.85) 100%), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600&auto=format&fit=crop') center/cover; }
+        .basket-bg { background: linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.85) 100%), url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1600&auto=format&fit=crop') center/cover; }
+        .court-bg { background: linear-gradient(135deg, #121212 0%, #1a1a1a 100%); border: 1px solid #333; position: relative; overflow: hidden; }
+        .player-token { transition: transform 0.2s ease; cursor: grab; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- TELA DE LOGIN UNIFICADA -->
+    <div id="view-login" class="min-h-screen flex flex-col items-center justify-center p-6 bg-gorilla-dark relative">
+        <div class="max-w-md w-full bg-gorilla-card border border-gorilla-border rounded-3xl p-8 space-y-6 shadow-2xl relative z-10">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 rounded-2xl bg-gorilla-olive flex items-center justify-center font-black text-white text-xl mx-auto shadow-lg">GT</div>
+                <h1 class="text-2xl font-black uppercase tracking-tight text-white italic">Gorilla Team<span class="text-gorilla-olive">.pro</span></h1>
+                <p class="text-xs text-gorilla-textMuted uppercase tracking-widest font-semibold">Plataforma de Acesso Restrito</p>
+            </div>
+
+            <form onsubmit="fazerLogin(event)" class="space-y-4">
+                <div class="space-y-1">
+                    <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted tracking-wider">E-mail de Acesso</label>
+                    <input type="email" id="login-email" placeholder="seu@email.com" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-gorilla-olive">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted tracking-wider">Senha</label>
+                    <input type="password" id="login-senha" placeholder="••••••••" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-gorilla-olive">
+                </div>
+                <button type="submit" class="w-full bg-gorilla-olive hover:bg-gorilla-oliveHover text-white py-3 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg transition-all">Entrar na Plataforma</button>
+            </form>
+
+            <div class="pt-4 border-t border-gorilla-border text-center space-y-2">
+                <p class="text-[10px] text-gorilla-textMuted uppercase font-bold">Atalhos rápidos para teste:</p>
+                <div class="flex gap-2 justify-center">
+                    <button onclick="loginRapido('admin')" class="bg-gorilla-border hover:bg-white hover:text-black text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all">Entrar como Admin</button>
+                    <button onclick="loginRapido('aluno')" class="bg-gorilla-border hover:bg-white hover:text-black text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all">Entrar como Aluno</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA DE SELEÇÃO INICIAL (HOME DO PORTAL PARA O ADMIN) -->
+    <div id="view-home" class="split-section bg-gorilla-dark hidden">
+        <div class="absolute top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center flex items-center gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white italic drop-shadow-lg">Gorilla Team<span class="text-gorilla-orange">.pro</span></h1>
+                <span class="text-[9px] uppercase tracking-[0.4em] text-gorilla-textMuted font-extrabold">Professional Training Hub</span>
+            </div>
+            <button onclick="logout()" class="pointer-events-auto bg-gorilla-card border border-gorilla-border hover:border-red-500 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase">Sair</button>
+        </div>
+
+        <div onclick="entrarSistema('gym')" class="split-side gym-side gym-bg flex flex-col justify-end p-8 md:p-16 group">
+            <div class="absolute inset-0 bg-gorilla-olive/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="relative z-10 space-y-3">
+                <span class="text-xs uppercase tracking-[0.3em] text-gorilla-olive font-black">01 // Consultoria</span>
+                <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white italic">Musculação</h2>
+                <p class="text-xs md:text-sm text-gorilla-textMuted max-w-sm leading-relaxed opacity-80 group-hover:opacity-100">
+                    Gestão de atletas, Pollock 7 dobras, diário de cargas interativo e prescrição de alta performance.
+                </p>
+                <div class="pt-4 flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
+                    Acessar Consultoria <span class="text-gorilla-olive group-hover:translate-x-2 transition-transform">→</span>
+                </div>
+            </div>
+        </div>
+
+        <div onclick="entrarSistema('basket')" class="split-side basket-side basket-bg flex flex-col justify-end p-8 md:p-16 group">
+            <div class="absolute inset-0 bg-gorilla-orange/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="relative z-10 space-y-3">
+                <span class="text-xs uppercase tracking-[0.3em] text-gorilla-orange font-black">02 // Quadra</span>
+                <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white italic">Basketball</h2>
+                <p class="text-xs md:text-sm text-gorilla-textMuted max-w-sm leading-relaxed opacity-80 group-hover:opacity-100">
+                    Playbook digital, prancheta tática animada, scout de partidas e controle de carga RPE.
+                </p>
+                <div class="pt-4 flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
+                    Acessar Playbook <span class="text-gorilla-orange group-hover:translate-x-2 transition-transform">→</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APLICAÇÃO INTERNA -->
+    <div id="view-app" class="min-h-screen flex flex-col md:flex-row hidden">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-64 bg-gorilla-card border-r border-gorilla-border flex flex-col justify-between p-6 shrink-0">
+            <div>
+                <div class="mb-8 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div id="sidebar-logo-box" class="w-10 h-10 rounded-xl bg-gorilla-olive flex items-center justify-center font-black text-white text-lg shadow-md">GT</div>
+                        <div>
+                            <h1 class="font-black text-sm uppercase text-white tracking-wider italic">Gorilla Team</h1>
+                            <span id="sidebar-subtitle" class="text-[9px] uppercase tracking-widest text-gorilla-olive font-bold">Consultoria</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="voltarHome()" id="btn-voltar-modulo" class="w-full mb-6 bg-gorilla-dark border border-gorilla-border hover:border-white text-xs font-bold uppercase tracking-wider py-2.5 rounded-xl text-gorilla-textMuted hover:text-white transition-all shadow-sm">
+                    ← Trocar de Módulo
+                </button>
+
+                <!-- Menus Gym -->
+                <nav id="menu-gym" class="space-y-1.5">
+                    <button onclick="switchTabGym('dashboard')" id="nav-g-dash" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all bg-gorilla-olive text-white shadow-md">Painel de Alunos</button>
+                    <button onclick="switchTabGym('workouts')" id="nav-g-work" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Gestão de Treinos</button>
+                    <button onclick="switchTabGym('portal')" id="nav-g-portal" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Portal do Aluno (Elite)</button>
+                </nav>
+
+                <!-- Menus Basket -->
+                <nav id="menu-basket" class="space-y-1.5 hidden">
+                    <button onclick="switchTabBasket('playbook')" id="nav-b-play" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all bg-gorilla-orange text-white shadow-md">Playbook & Vídeos</button>
+                    <button onclick="switchTabBasket('board')" id="nav-b-board" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Prancheta Tática</button>
+                    <button onclick="switchTabBasket('skills')" id="nav-b-skills" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Treinos & Skills</button>
+                    <button onclick="switchTabBasket('scout')" id="nav-b-scout" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Scout de Partida</button>
+                    <button onclick="switchTabBasket('readiness')" id="nav-b-read" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Carga & Prontidão</button>
+                    <button onclick="switchTabBasket('calendar')" id="nav-b-cal" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Calendário & Jogos</button>
+                </nav>
+            </div>
+            <div class="pt-4 border-t border-gorilla-border flex justify-between items-center">
+                <p class="text-[9px] text-gorilla-textMuted uppercase font-bold tracking-widest">gorillateam.pro</p>
+                <button onclick="logout()" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Sair</button>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="flex-1 p-6 md:p-10 overflow-y-auto max-w-7xl mx-auto w-full">
+            
+            <!-- SISTEMA DE MUSCULAÇÃO -->
+            <div id="system-gym" class="space-y-6">
+                <section id="g-tab-dashboard" class="space-y-6">
+                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Consultoria</span>
+                            <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Painel de Alunos</h2>
+                        </div>
+                        <button onclick="openModal('modal-aluno')" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg transition-all">+ Cadastrar Aluno</button>
+                    </header>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="lista-alunos-grid"></div>
+                </section>
+
+                <section id="g-tab-workouts" class="space-y-6 hidden">
+                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Prescrição</span>
+                            <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Gestão de Treinos</h2>
+                        </div>
+                        <button onclick="openModal('modal-treino')" class="bg-gorilla-olive hover:bg-gorilla-oliveHover text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg transition-all">+ Nova Ficha</button>
+                    </header>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="lista-treinos-grid"></div>
+                </section>
+
+                <section id="g-tab-portal" class="space-y-6 hidden">
+                    <header class="border-b border-gorilla-border pb-6 flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest text-gorilla-olive font-extrabold">Área do Atleta</span>
+                            <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Portal de Treino Interativo</h2>
+                        </div>
+                        <select id="select-aluno-portal" onchange="renderizarPortalAluno()" class="bg-gorilla-card border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white focus:border-gorilla-olive"></select>
+                    </header>
+                    <div id="conteudo-portal-aluno" class="space-y-6"></div>
+                </section>
+            </div>
+
+            <!-- SISTEMA DE BASQUETE -->
+            <div id="system-basket" class="space-y-6 hidden">
+                <section id="b-tab-playbook" class="space-y-6">
+                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest text-gorilla-orange font-extrabold">Basketball Program</span>
+                            <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Playbook & Vídeos</h2>
+                        </div>
+                        <button onclick="openModal('modal-jogada')" class="bg-gorilla-orange hover:bg-gorilla-orangeHover text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg transition-all">+ Adicionar Jogada</button>
+                    </header>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="lista-jogadas-grid"></div>
+                </section>
+
+                <section id="b-tab-board" class="space-y-6 hidden">
+                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest text-gorilla-orange font-extrabold">Tática</span>
+                            <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Prancheta Tática</h2>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="resetarPosicoes()" class="bg-gorilla-border hover:bg-white hover:text-black text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">Resetar</button>
+                            <button onclick="animarJogadaPrancheta()" class="bg-gorilla-orange hover:bg-gorilla-orangeHover text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg transition-all">▶ Simular</button>
+                        </div>
+                    </header>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 court-bg h-[420px] rounded-2xl relative flex items-center justify-center p-4 shadow-2xl">
+                            <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewBox="0 0 600 450" fill="none" stroke="#f97316" stroke-width="2">
+                                <line x1="0" y1="440" x2="600" y2="440" /><path d="M 240 440 A 60 60 0 0 1 360 440" /><rect x="210" y="200" width="180" height="240" /><line x1="270" y1="200" x2="330" y2="200" stroke-width="4" stroke="#ffffff" />
+                            </svg>
+                            <div id="token-1" class="player-token absolute bottom-12 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-gorilla-orange text-white font-black flex items-center justify-center text-xs shadow-lg border-2 border-white">1</div>
+                            <div id="token-2" class="player-token absolute bottom-28 left-36 w-10 h-10 rounded-full bg-gorilla-card text-white font-black flex items-center justify-center text-xs shadow-lg border-2 border-gorilla-orange">2</div>
+                            <div id="token-3" class="player-token absolute bottom-28 right-36 w-10 h-10 rounded-full bg-gorilla-card text-white font-black flex items-center justify-center text-xs shadow-lg border-2 border-gorilla-orange">3</div>
+                            <div id="token-4" class="player-token absolute bottom-44 left-44 w-10 h-10 rounded-full bg-gorilla-card text-white font-black flex items-center justify-center text-xs shadow-lg border-2 border-gorilla-orange">4</div>
+                            <div id="token-5" class="player-token absolute top-56 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-gorilla-card text-white font-black flex items-center justify-center text-xs shadow-lg border-2 border-gorilla-orange">5</div>
+                        </div>
+                        <div class="bg-gorilla-card border border-gorilla-border rounded-2xl p-6 space-y-4 shadow-xl">
+                            <span class="text-[10px] uppercase font-bold tracking-widest text-gorilla-orange">Guia Tático</span>
+                            <h3 class="font-black uppercase text-white text-lg tracking-tight italic">Pick & Roll Central</h3>
+                            <p class="text-xs text-gorilla-textMuted leading-relaxed">Armador conduz, pivô realiza o bloqueio direto e alas espaçam o perímetro.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="b-tab-skills" class="space-y-6 hidden">
+                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Treinos & Skills</h2>
+                        <button onclick="openModal('modal-treino-basket')" class="bg-gorilla-orange text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase shadow-lg">+ Nova Rotina</button>
+                    </header>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="lista-treinos-basket-grid"></div>
+                </section>
+
+                <section id="b-tab-scout" class="space-y-6 hidden">
+                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Scout de Partida</h2>
+                        <button onclick="openModal('modal-scout')" class="bg-gorilla-orange text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase shadow-lg">+ Registrar Scout</button>
+                    </header>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="lista-scout-grid"></div>
+                </section>
+
+                <section id="b-tab-readiness" class="space-y-6 hidden">
+                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Carga & Prontidão</h2>
+                        <button onclick="openModal('modal-readiness')" class="bg-gorilla-orange text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase shadow-lg">+ Nova Avaliação RPE</button>
+                    </header>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="lista-readiness-grid"></div>
+                </section>
+
+                <section id="b-tab-calendar" class="space-y-6 hidden">
+                    <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-white italic">Calendário de Jogos</h2>
+                        <button onclick="openModal('modal-jogo')" class="bg-gorilla-orange text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase shadow-lg">+ Agendar Jogo</button>
+                    </header>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="lista-jogos-grid"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAIS -->
+    <div id="modal-aluno" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-gorilla-card border border-gorilla-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-black uppercase tracking-wider text-white">Cadastrar Aluno</h3>
+            <form onsubmit="salvarAluno(event)" class="space-y-3">
+                <input type="text" id="aluno-nome" placeholder="Nome Completo" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="aluno-idade" placeholder="Idade" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white">
+                    <select id="aluno-sexo" class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white"><option value="M">Masculino</option><option value="F">Feminino</option></select>
+                </div>
+                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-aluno')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button><button type="submit" class="bg-gorilla-olive text-white px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider">Salvar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-treino" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-gorilla-card border border-gorilla-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-black uppercase tracking-wider text-white">Nova Ficha de Treino</h3>
+            <form onsubmit="salvarTreino(event)" class="space-y-3">
+                <select id="treino-aluno-id" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white"></select>
+                <input type="text" id="treino-titulo" placeholder="Título / Divisão" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white">
+                <div id="container-exercicios" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+                    <div class="bg-gorilla-dark p-3 rounded-xl border border-gorilla-border space-y-2">
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="Exercício" class="flex-1 bg-gorilla-card border border-gorilla-border rounded-lg px-3 py-1.5 text-xs text-white ex-nome" required>
+                            <input type="text" placeholder="Séries x Reps" class="w-24 bg-gorilla-card border border-gorilla-border rounded-lg px-3 py-1.5 text-xs text-white ex-reps" required>
+                        </div>
+                        <input type="text" placeholder="Link do Vídeo de Execução" class="w-full bg-gorilla-card border border-gorilla-border rounded-lg px-3 py-1.5 text-xs text-white ex-video">
+                    </div>
+                </div>
+                <button type="button" onclick="adicionarLinhaExercicio()" class="text-xs text-gorilla-olive font-bold uppercase tracking-wider">+ Adicionar Exercício</button>
+                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-treino')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button><button type="submit" class="bg-gorilla-olive text-white px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider">Salvar Ficha</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modais Basket -->
+    <div id="modal-jogada" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-gorilla-card border border-gorilla-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-black uppercase tracking-wider text-white">Nova Tática</h3>
+            <form onsubmit="salvarJogada(event)" class="space-y-3">
+                <input type="text" id="jogada-nome" placeholder="Nome da Jogada" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white">
+                <select id="jogada-cat" class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white"><option value="Ataque">Ataque</option><option value="Transicao">Transição</option><option value="Defesa">Defesa</option></select>
+                <textarea id="jogada-desc" rows="2" placeholder="Descrição..." required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs text-white"></textarea>
+                <input type="text" id="jogada-video" placeholder="Link de Vídeo" class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs text-white">
+                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-jogada')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button><button type="submit" class="bg-gorilla-orange text-white px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider">Salvar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-treino-basket" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-gorilla-card border border-gorilla-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-black uppercase tracking-wider text-white">Rotina de Skills</h3>
+            <form onsubmit="salvarTreinoBasket(event)" class="space-y-3">
+                <input type="text" id="tb-titulo" placeholder="Título" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white">
+                <textarea id="tb-drills" rows="3" placeholder="Drills..." required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs text-white"></textarea>
+                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-treino-basket')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button><button type="submit" class="bg-gorilla-orange text-white px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider">Salvar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-scout" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-gorilla-card border border-gorilla-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-black uppercase tracking-wider text-white">Scout</h3>
+            <form onsubmit="salvarScout(event)" class="space-y-3">
+                <input type="text" id="scout-atleta" placeholder="Atleta" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white">
+                <input type="text" id="scout-adversario" placeholder="Adversário" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white">
+                <div class="grid grid-cols-3 gap-2"><input type="number" id="scout-pts" value="0" placeholder="PTS" class="bg-gorilla-dark border border-gorilla-border rounded-xl px-3 py-2 text-xs text-white"><input type="number" id="scout-ast" value="0" placeholder="AST" class="bg-gorilla-dark border border-gorilla-border rounded-xl px-3 py-2 text-xs text-white"><input type="number" id="scout-reb" value="0" placeholder="REB" class="bg-gorilla-dark border border-gorilla-border rounded-xl px-3 py-2 text-xs text-white"></div>
+                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-scout')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button><button type="submit" class="bg-gorilla-orange text-white px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider">Salvar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-readiness" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-gorilla-card border border-gorilla-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-black uppercase tracking-wider text-white">RPE / Prontidão</h3>
+            <form onsubmit="salvarReadiness(event)" class="space-y-3">
+                <input type="text" id="rpe-atleta" placeholder="Atleta" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white">
+                <input type="number" id="rpe-nivel" min="1" max="10" value="5" placeholder="Cansaço (1-10)" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white">
+                <textarea id="rpe-obs" rows="2" placeholder="Observações..." class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs text-white"></textarea>
+                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-readiness')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button><button type="submit" class="bg-gorilla-orange text-white px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider">Salvar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-jogo" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-gorilla-card border border-gorilla-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-black uppercase tracking-wider text-white">Agendar Jogo</h3>
+            <form onsubmit="salvarJogo(event)" class="space-y-3">
+                <input type="text" id="jogo-adv" placeholder="Adversário" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-xl px-4 py-2.5 text-xs font-bold uppercase text-white">
+                <div class="grid grid-cols-2 gap-2"><input type="date" id="jogo-data" required class="bg-gorilla-dark border border-gorilla-border rounded-xl px-3 py-2 text-xs text-white"><input type="text" id="jogo-hora" placeholder="Horário" required class="bg-gorilla-dark border border-gorilla-border rounded-xl px-3 py-2 text-xs text-white"></div>
+                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-jogo')" class="text-xs text-gorilla-textMuted uppercase font-bold">Cancelar</button><button type="submit" class="bg-gorilla-orange text-white px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider">Salvar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT DO SISTEMA -->
+    <script>
+        let dbAlunos = JSON.parse(localStorage.getItem('gorilla_alunos')) || [{ id: 1, nome: 'Lucas Mendes', idade: 26, sexo: 'M' }];
+        let dbTreinos = JSON.parse(localStorage.getItem('gorilla_treinos')) || [];
+        let dbDiarioCargas = JSON.parse(localStorage.getItem('gorilla_diario_cargas')) || {};
+        let dbJogadas = JSON.parse(localStorage.getItem('gorilla_basket_jogadas')) || [{ id: 1, nome: 'Pick & Roll Central', cat: 'Ataque', desc: 'Bloqueio direto.', video: '' }];
+        let dbTreinosBasket = JSON.parse(localStorage.getItem('gorilla_basket_treinos')) || [];
+        let dbScout = JSON.parse(localStorage.getItem('gorilla_basket_scout')) || [];
+        let dbReadiness = JSON.parse(localStorage.getItem('gorilla_basket_readiness')) || [];
+        let dbJogos = JSON.parse(localStorage.getItem('gorilla_basket_jogos')) || [];
+
+        function salvarDados() {
+            localStorage.setItem('gorilla_alunos', JSON.stringify(dbAlunos));
+            localStorage.setItem('gorilla_treinos', JSON.stringify(dbTreinos));
+            localStorage.setItem('gorilla_diario_cargas', JSON.stringify(dbDiarioCargas));
+            localStorage.setItem('gorilla_basket_jogadas', JSON.stringify(dbJogadas));
+            localStorage.setItem('gorilla_basket_treinos', JSON.stringify(dbTreinosBasket));
+            localStorage.setItem('gorilla_basket_scout', JSON.stringify(dbScout));
+            localStorage.setItem('gorilla_basket_readiness', JSON.stringify(dbReadiness));
+            localStorage.setItem('gorilla_basket_jogos', JSON.stringify(dbJogos));
+        }
+
+        // Sistema de Login Simulado
+        function fazerLogin(e) {
+            e.preventDefault();
+            let email = document.getElementById('login-email').value;
+            if(email.includes('admin') || email === 'admin@gorillateam.pro') {
+                localStorage.setItem('gorilla_user_role', 'admin');
+                abrirPainelAdmin();
+            } else {
+                localStorage.setItem('gorilla_user_role', 'aluno');
+                localStorage.setItem('gorilla_user_email', email);
+                abrirPainelAlunoRestrito();
+            }
+        }
+
+        function loginRapido(tipo) {
+            if(tipo === 'admin') {
+                localStorage.setItem('gorilla_user_role', 'admin');
+                abrirPainelAdmin();
+            } else {
+                localStorage.setItem('gorilla_user_role', 'aluno');
+                localStorage.setItem('gorilla_user_email', 'lucas@aluno.com');
+                abrirPainelAlunoRestrito();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('gorilla_user_role');
+            document.getElementById('view-app').classList.add('hidden');
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-login').classList.remove('hidden');
+        }
+
+        function abrirPainelAdmin() {
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-home').classList.remove('hidden');
+        }
+
+        function abrirPainelAlunoRestrito() {
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+            // Oculta módulos de admin e deixa direto na visão de treino do aluno
+            document.getElementById('menu-gym').classList.remove('hidden');
+            document.getElementById('menu-basket').classList.add('hidden');
+            document.getElementById('system-gym').classList.remove('hidden');
+            document.getElementById('system-basket').classList.add('hidden');
+            document.getElementById('btn-voltar-modulo').style.display = 'none'; // Aluno não troca de módulo
+            
+            // Abre direto a aba de portal do aluno travada no perfil dele
+            switchTabGym('portal');
+            // Esconde o seletor para que o aluno só veja o treino dele
+            document.getElementById('select-aluno-portal').style.display = 'none';
+        }
+
+        function entrarSistema(tipo) {
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+            document.getElementById('btn-voltar-modulo').style.display = 'block';
+            if(tipo === 'gym') {
+                document.getElementById('system-gym').classList.remove('hidden');
+                document.getElementById('system-basket').classList.add('hidden');
+                document.getElementById('menu-gym').classList.remove('hidden');
+                document.getElementById('menu-basket').classList.add('hidden');
+                document.getElementById('sidebar-logo-box').className = "w-10 h-10 rounded-xl bg-gorilla-olive flex items-center justify-center font-black text-white text-lg shadow-md";
+                document.getElementById('sidebar-subtitle').innerText = "Consultoria";
+                document.getElementById('sidebar-subtitle').className = "text-[9px] uppercase tracking-widest text-gorilla-olive font-bold";
+                renderizarAlunos();
+            } else {
+                document.getElementById('system-gym').classList.add('hidden');
+                document.getElementById('system-basket').classList.remove('hidden');
+                document.getElementById('menu-gym').classList.add('hidden');
+                document.getElementById('menu-basket').classList.remove('hidden');
+                document.getElementById('sidebar-logo-box').className = "w-10 h-10 rounded-xl bg-gorilla-orange flex items-center justify-center font-black text-white text-lg shadow-md";
+                document.getElementById('sidebar-subtitle').innerText = "Basketball Program";
+                document.getElementById('sidebar-subtitle').className = "text-[9px] uppercase tracking-widest text-gorilla-orange font-bold";
+                renderizarJogadas();
+            }
+        }
+
+        function voltarHome() {
+            document.getElementById('view-app').classList.add('hidden');
+            document.getElementById('view-home').classList.remove('hidden');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); if(id==='modal-treino') popularSelectAlunosGym(); }
+        function closeModal(id) { document.getElementById(id).classList.remove('flex'); document.getElementById(id).classList.add('hidden'); }
+
+        function switchTabGym(tab) {
+            ['dashboard', 'workouts', 'portal'].forEach(t => document.getElementById(`g-tab-${t}`).classList.add('hidden'));
+            ['dash', 'work', 'portal'].forEach(code => {
+                let el = document.getElementById(`nav-g-${code}`);
+                if(el) el.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white";
+            });
+            document.getElementById(`g-tab-${tab}`).classList.remove('hidden');
+            let activeCode = tab === 'dashboard' ? 'dash' : tab === 'workouts' ? 'work' : 'portal';
+            let activeEl = document.getElementById(`nav-g-${activeCode}`);
+            if(activeEl) activeEl.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all bg-gorilla-olive text-white shadow-md";
+            
+            if(tab === 'portal') { popularSelectPortal(); renderizarPortalAluno(); }
+            if(tab === 'workouts') renderizarTreinosGym();
+        }
+
+        function switchTabBasket(tab) {
+            ['playbook', 'board', 'skills', 'scout', 'readiness', 'calendar'].forEach(t => document.getElementById(`b-tab-${t}`).classList.add('hidden'));
+            ['play', 'board', 'skills', 'scout', 'read', 'cal'].forEach(code => {
+                let el = document.getElementById(`nav-b-${code}`);
+                if(el) el.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white";
+            });
+            let activeCode = tab === 'playbook' ? 'play' : tab === 'board' ? 'board' : tab === 'skills' ? 'skills' : tab === 'scout' ? 'scout' : tab === 'readiness' ? 'read' : 'cal';
+            document.getElementById(`b-tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`nav-b-${activeCode}`).className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all bg-gorilla-orange text-white shadow-md";
+            
+            if(tab==='playbook') renderizarJogadas();
+            if(tab==='skills') renderizarTreinosBasket();
+            if(tab==='scout') renderizarScout();
+            if(tab==='readiness') renderizarReadiness();
+            if(tab==='calendar') renderizarJogos();
+        }
+
+        function renderizarAlunos() {
+            const grid = document.getElementById('lista-alunos-grid'); grid.innerHTML = '';
+            dbAlunos.forEach(a => {
+                grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-2xl p-5 space-y-2 shadow-sm"><h3 class="font-extrabold uppercase text-white tracking-tight">${a.nome}</h3><p class="text-xs text-gorilla-textMuted">${a.idade} anos • ${a.sexo === 'M' ? 'Masculino' : 'Feminino'}</p></div>`;
+            });
+        }
+        function salvarAluno(e) {
+            e.preventDefault();
+            dbAlunos.push({ id: Date.now(), nome: document.getElementById('aluno-nome').value, idade: parseInt(document.getElementById('aluno-idade').value), sexo: document.getElementById('aluno-sexo').value });
+            salvarDados(); closeModal('modal-aluno'); renderizarAlunos();
+        }
+        function popularSelectAlunosGym() {
+            const sel = document.getElementById('treino-aluno-id'); sel.innerHTML = '';
+            dbAlunos.forEach(a => sel.innerHTML += `<option value="${a.id}">${a.nome}</option>`);
+        }
+        function adicionarLinhaExercicio() {
+            document.getElementById('container-exercicios').innerHTML += `
+                <div class="bg-gorilla-dark p-3 rounded-xl border border-gorilla-border space-y-2">
+                    <div class="flex gap-2">
+                        <input type="text" placeholder="Exercício" class="flex-1 bg-gorilla-card border border-gorilla-border rounded-lg px-3 py-1.5 text-xs text-white ex-nome" required>
+                        <input type="text" placeholder="Séries x Reps" class="w-24 bg-gorilla-card border border-gorilla-border rounded-lg px-3 py-1.5 text-xs text-white ex-reps" required>
+                    </div>
+                    <input type="text" placeholder="Link do Vídeo de Execução" class="w-full bg-gorilla-card border border-gorilla-border rounded-lg px-3 py-1.5 text-xs text-white ex-video">
+                </div>`;
+        }
+        function salvarTreino(e) {
+            e.preventDefault();
+            const exercicios = [];
+            document.querySelectorAll('#container-exercicios > div').forEach(node => {
+                exercicios.push({
+                    nome: node.querySelector('.ex-nome').value,
+                    reps: node.querySelector('.ex-reps').value,
+                    video: node.querySelector('.ex-video').value
+                });
+            });
+            dbTreinos.push({ id: Date.now(), alunoId: parseInt(document.getElementById('treino-aluno-id').value), titulo: document.getElementById('treino-titulo').value, exercicios });
+            salvarDados(); closeModal('modal-treino'); renderizarTreinosGym();
+        }
+        function renderizarTreinosGym() {
+            const grid = document.getElementById('lista-treinos-grid'); grid.innerHTML = '';
+            dbTreinos.forEach(t => {
+                const aluno = dbAlunos.find(a => a.id === t.alunoId);
+                grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-2xl p-5 space-y-2"><span class="text-[10px] uppercase font-bold text-gorilla-olive">${aluno ? aluno.nome : ''}</span><h3 class="font-extrabold uppercase text-white tracking-tight">${t.titulo}</h3></div>`;
+            });
+        }
+        function popularSelectPortal() {
+            const sel = document.getElementById('select-aluno-portal'); 
+            sel.innerHTML = '';
+            dbAlunos.forEach(a => sel.innerHTML += `<option value="${a.id}">${a.nome}</option>`);
+        }
+
+        function renderizarPortalAluno() {
+            const cont = document.getElementById('conteudo-portal-aluno');
+            let role = localStorage.getItem('gorilla_user_role');
+            let alunoId;
+            
+            if(role === 'aluno') {
+                alunoId = dbAlunos[0] ? dbAlunos[0].id : 1; // Puxa o primeiro aluno para teste
+            } else {
+                alunoId = parseInt(document.getElementById('select-aluno-portal').value);
+            }
+
+            const treinos = dbTreinos.filter(t => t.alunoId === alunoId);
+            
+            if(!treinos.length) {
+                cont.innerHTML = '<div class="bg-gorilla-card p-6 rounded-2xl border border-gorilla-border text-center text-xs text-gorilla-textMuted uppercase font-bold">Nenhum treino prescrito para este atleta no momento.</div>';
+                return;
+            }
+
+            cont.innerHTML = treinos.map(t => `
+                <div class="bg-gorilla-card border border-gorilla-border rounded-2xl p-6 space-y-4 shadow-xl">
+                    <div class="flex justify-between items-center border-b border-gorilla-border pb-3">
+                        <h3 class="text-lg font-black uppercase text-white italic tracking-tight">${t.titulo}</h3>
+                        <span class="text-[10px] uppercase font-bold bg-gorilla-olive/20 text-gorilla-olive px-2.5 py-1 rounded-lg">Ativo</span>
+                    </div>
+                    <div class="space-y-3">
+                        ${t.exercicios.map((ex, idx) => {
+                            let chaveCarga = `${alunoId}_${t.id}_${idx}`;
+                            let cargaSalva = dbDiarioCargas[chaveCarga] || '';
+                            return `
+                                <div class="bg-gorilla-dark p-4 rounded-xl border border-gorilla-border flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-extrabold text-sm uppercase text-white">${ex.nome}</span>
+                                            ${ex.video ? `<a href="${ex.video}" target="_blank" class="text-[10px] bg-gorilla-border hover:bg-gorilla-olive text-white px-2 py-0.5 rounded font-bold transition-all">▶ Vídeo</a>` : ''}
+                                        </div>
+                                        <p class="text-xs text-gorilla-textMuted font-semibold">Meta Prescrita: <span class="text-white">${ex.reps}</span></p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="text-right">
+                                            <label class="block text-[9px] uppercase tracking-wider text-gorilla-textMuted font-extrabold">Carga Real Usada</label>
+                                            <input type="text" value="${cargaSalva}" placeholder="Ex: 40kg" onchange="salvarCargaDiaria(${alunoId}, ${t.id}, ${idx}, this.value)" class="bg-gorilla-card border border-gorilla-border rounded-lg px-3 py-1.5 text-xs font-bold text-white w-28 text-center focus:border-gorilla-olive">
+                                        </div>
+                                    </div>
+                                </div>`;
+                        }).join('')}
+                    </div>
+                </div>`).join('');
+        }
+
+        function salvarCargaDiaria(alunoId, treinoId, exercicioIdx, valor) {
+            let chave = `${alunoId}_${treinoId}_${exercicioIdx}`;
+            dbDiarioCargas[chave] = valor;
+            salvarDados();
+        }
+
+        function resetarPosicoes() { ['1','2','3','4','5'].forEach(i => document.getElementById(`token-${i}`).style.transform = "translate(0px, 0px)"); }
+        function animarJogadaPrancheta() {
+            document.getElementById('token-1').style.transform = "translate(40px, -90px)";
+            document.getElementById('token-5').style.transform = "translate(-30px, -80px)";
+        }
+        function renderizarJogadas() {
+            const grid = document.getElementById('lista-jogadas-grid'); grid.innerHTML = '';
+            dbJogadas.forEach(j => grid.innerHTML += `<div class="bg-gorilla-card p-5 rounded-2xl border border-gorilla-border space-y-2"><span class="text-[10px] uppercase font-extrabold text-gorilla-orange tracking-widest">${j.cat}</span><h3 class="font-black uppercase text-white tracking-tight">${j.nome}</h3><p class="text-xs text-gorilla-textMuted leading-relaxed">${j.desc}</p></div>`);
+        }
+        function salvarJogada(e) {
+            e.preventDefault();
+            dbJogadas.push({ id: Date.now(), nome: document.getElementById('jogada-nome').value, cat: document.getElementById('jogada-cat').value, desc: document.getElementById('jogada-desc').value });
+            salvarDados(); closeModal('modal-jogada'); renderizarJogadas();
+        }
+        function renderizarTreinosBasket() {
+            const grid = document.getElementById('lista-treinos-basket-grid'); grid.innerHTML = '';
+            dbTreinosBasket.forEach(t => grid.innerHTML += `<div class="bg-gorilla-card p-5 rounded-2xl border border-gorilla-border space-y-2"><h3 class="font-black uppercase text-white tracking-tight">${t.titulo}</h3><p class="text-xs text-gorilla-textMuted leading-relaxed">${t.drills}</p></div>`);
+        }
+        function salvarTreinoBasket(e) {
+            e.preventDefault(); dbTreinosBasket.push({ id: Date.now(), titulo: document.getElementById('tb-titulo').value, drills: document.getElementById('tb-drills').value });
+            salvarDados(); closeModal('modal-treino-basket'); renderizarTreinosBasket();
+        }
+        function renderizarScout() {
+            const grid = document.getElementById('lista-scout-grid'); grid.innerHTML = '';
+            dbScout.forEach(s => grid.innerHTML += `<div class="bg-gorilla-card p-5 rounded-2xl border border-gorilla-border space-y-2"><h3 class="font-black uppercase text-white tracking-tight">${s.atleta}</h3><p class="text-xs text-gorilla-orange font-bold uppercase tracking-wider">PTS: ${s.pts} | AST: ${s.ast} | REB: ${s.reb}</p></div>`);
+        }
+        function salvarScout(e) {
+            e.preventDefault(); dbScout.push({ id: Date.now(), atleta: document.getElementById('scout-atleta').value, adversario: document.getElementById('scout-adversario').value, pts: document.getElementById('scout-pts').value, ast: document.getElementById('scout-ast').value, reb: document.getElementById('scout-reb').value });
+            salvarDados(); closeModal('modal-scout'); renderizarScout();
+        }
+        function renderizarReadiness() {
+            const grid = document.getElementById('lista-readiness-grid'); grid.innerHTML = '';
+            dbReadiness.forEach(r => grid.innerHTML += `<div class="bg-gorilla-card p-5 rounded-2xl border border-gorilla-border space-y-2"><h3 class="font-black uppercase text-white tracking-tight">${r.atleta}</h3><p class="text-xs text-gorilla-orange font-bold">Nível RPE: ${r.nivel}/10</p></div>`);
+        }
+        function salvarReadiness(e) {
+            e.preventDefault(); dbReadiness.push({ id: Date.now(), atleta: document.getElementById('rpe-atleta').value, nivel: document.getElementById('rpe-nivel').value, obs: document.getElementById('rpe-obs').value });
+            salvarDados(); closeModal('modal-readiness'); renderizarReadiness();
+        }
+        function renderizarJogos() {
+            const grid = document.getElementById('lista-jogos-grid'); grid.innerHTML = '';
+            dbJogos.forEach(g => grid.innerHTML += `<div class="bg-gorilla-card p-5 rounded-2xl border border-gorilla-border space-y-2"><h3 class="font-black uppercase text-white tracking-tight">${g.adv}</h3><p class="text-xs text-gorilla-textMuted">${g.data} - ${g.hora}</p></div>`);
+        }
+        function salvarJogo(e) {
+            e.preventDefault(); dbJogos.push({ id: Date.now(), adv: document.getElementById('jogo-adv').value, data: document.getElementById('jogo-data').value, hora: document.getElementById('jogo-hora').value });
+            salvarDados(); closeModal('modal-jogo'); renderizarJogos();
+        }
+    </script>
+</body>
+</html>
