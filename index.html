@@ -49,7 +49,7 @@
         }
         .gym-diagonal:hover { filter: brightness(1.1); }
         .basket-diagonal {
-            background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.92) 100%), url('https://images.unsplash.com/photo-1519766304817-4f37bda74a29?q=80&w=1600&auto=format&fit=crop') center/cover;
+            background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.92) 100%), url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1600&auto=format&fit=crop') center/cover;
             clip-path: polygon(65% 0, 100% 0, 100% 100%, 35% 100%); z-index: 1; align-items: flex-end; text-align: right;
         }
         .basket-diagonal:hover { filter: brightness(1.1); }
@@ -932,13 +932,12 @@
             localStorage.setItem('gorilla_historico_cargas', JSON.stringify(historico));
         }
 
-        // SALVAR AVALIAÇÃO FÍSICA COMPLETA + CÁLCULOS AVANÇADOS
         window.salvarAvaliacaoFisicaCompleta = async function(e) {
             e.preventDefault();
             const alunoId = document.getElementById('aval-aluno-id').value;
             const data = document.getElementById('aval-data').value;
             const peso = parseFloat(document.getElementById('aval-peso').value);
-            const altura = parseFloat(document.getElementById('aval-altura').value); // em cm
+            const altura = parseFloat(document.getElementById('aval-altura').value);
             
             const dobras = {
                 torax: parseFloat(document.getElementById('dobra-torax').value),
@@ -959,12 +958,10 @@
                 panturrilha: parseFloat(document.getElementById('per-panturrilha').value) || 0
             };
 
-            // Cálculos Antropométricos
             let alturaM = altura / 100;
             let imc = peso / (alturaM * alturaM);
             let somaDobras = dobras.torax + dobras.subescapular + dobras.axilar + dobras.suprailiaca + dobras.abdominal + dobras.coxa + dobras.triceps;
             
-            // Densidade e % de gordura (Pollock 7 dobras simplificado)
             let densidade = 1.112 - (0.00043499 * somaDobras) + (0.00000055 * (somaDobras * somaDobras)) - (0.00028826 * 22);
             let gorduraPerc = ((4.95 / densidade) - 4.5) * 100;
             if(gorduraPerc < 3) gorduraPerc = 5;
@@ -972,7 +969,6 @@
             let massaGordaKg = peso * (gorduraPerc / 100);
             let massaMagraKg = peso - massaGordaKg;
             
-            // % Gordura Ideal estimado (Referência saudável atlética ~12%)
             let gorduraIdealPerc = 12.0; 
             let pesoIdealKg = massaMagraKg / (1 - (gorduraIdealPerc / 100));
             let idadeCorporal = Math.round(22 + (gorduraPerc > 18 ? (gorduraPerc - 18) * 0.8 : -2));
@@ -1033,7 +1029,6 @@
                                         ${role === 'admin' ? `<button onclick="deletarAvaliacaoCompleta('${a.id}')" class="text-[10px] text-red-400 hover:underline uppercase font-bold">Apagar</button>` : ''}
                                     </div>
 
-                                    <!-- Grid de Resultados Detalhados -->
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                                         <div class="bg-gorilla-dark p-3.5 border border-gorilla-border">
                                             <span class="text-[9px] uppercase tracking-wider text-gorilla-textMuted font-bold block">Peso Atual</span>
