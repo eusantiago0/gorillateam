@@ -32,13 +32,11 @@
         ::-webkit-scrollbar-track { background: #0a0a0a; }
         ::-webkit-scrollbar-thumb { background: #333333; }
         
-        /* Efeitos Neon Brutalistas */
         .neon-box-olive { box-shadow: 0 0 15px rgba(101, 115, 56, 0.4); border: 1px solid #657338; }
         .neon-box-orange { box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); border: 1px solid #f97316; }
         .neon-text-olive { text-shadow: 0 0 10px rgba(101, 115, 56, 0.6); }
         .neon-text-orange { text-shadow: 0 0 10px rgba(249, 115, 22, 0.6); }
 
-        /* Divisão Diagonal Estática */
         .split-diagonal { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
         .diagonal-side {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -66,16 +64,17 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- TELA DE LOGIN BRUTALISTA / MINIMALISTA (Estilo Nike/Adidas com fundo CrossFit) -->
+    <!-- TELA DE LOGIN / REGISTRO BRUTALISTA -->
     <div id="view-login" class="min-h-screen flex flex-col items-center justify-center p-6 relative" style="background: linear-gradient(180deg, rgba(10,10,10,0.7) 0%, rgba(10,10,10,0.95) 100%), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1800&auto=format&fit=crop') center/cover;">
         <div class="max-w-md w-full bg-gorilla-card border border-gorilla-border p-10 space-y-8 shadow-2xl relative z-10 rounded-none neon-box-olive">
             <div class="space-y-3 text-left">
                 <div class="w-10 h-10 bg-gorilla-olive flex items-center justify-center font-black text-white text-lg rounded-none">GT</div>
                 <h1 class="text-3xl font-black uppercase tracking-tighter text-white italic">Gorilla Team<span class="text-gorilla-olive">.pro</span></h1>
-                <p class="text-[10px] text-gorilla-textMuted uppercase tracking-[0.3em] font-extrabold">Restricted Access // High Performance</p>
+                <p id="auth-subtitle" class="text-[10px] text-gorilla-textMuted uppercase tracking-[0.3em] font-extrabold">Restricted Access // High Performance</p>
             </div>
 
-            <form onsubmit="fazerLoginFirebase(event)" class="space-y-5">
+            <!-- FORMULÁRIO DE LOGIN -->
+            <form id="form-login" onsubmit="fazerLoginFirebase(event)" class="space-y-5">
                 <div class="space-y-1">
                     <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted tracking-widest">E-mail</label>
                     <input type="email" id="login-email" placeholder="admin@gorillateam.pro" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-3 text-xs font-bold text-white focus:border-gorilla-olive outline-none">
@@ -85,7 +84,31 @@
                     <input type="password" id="login-senha" placeholder="••••••••" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-3 text-xs font-bold text-white focus:border-gorilla-olive outline-none">
                 </div>
                 <button type="submit" class="w-full bg-gorilla-olive hover:bg-gorilla-oliveHover text-white py-4 rounded-none font-black text-xs uppercase tracking-[0.2em] transition-all neon-box-olive">AUTENTICAR</button>
+                <div class="text-center pt-2">
+                    <button type="button" onclick="alternarTelaAuth('registrar')" class="text-[10px] text-gorilla-textMuted hover:text-white uppercase font-bold tracking-widest underline">Não tem conta? Registre-se aqui</button>
+                </div>
             </form>
+
+            <!-- FORMULÁRIO DE REGISTRO (Oculto por padrão) -->
+            <form id="form-registro" onsubmit="fazerRegistroFirebase(event)" class="space-y-4 hidden">
+                <div class="space-y-1">
+                    <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted tracking-widest">Nome Completo</label>
+                    <input type="text" id="reg-nome" placeholder="Seu Nome" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-3 text-xs font-bold text-white focus:border-gorilla-olive outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted tracking-widest">E-mail</label>
+                    <input type="email" id="reg-email" placeholder="seu@email.com" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-3 text-xs font-bold text-white focus:border-gorilla-olive outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[10px] uppercase font-bold text-gorilla-textMuted tracking-widest">Password</label>
+                    <input type="password" id="reg-senha" placeholder="Mínimo 6 caracteres" required class="w-full bg-gorilla-dark border border-gorilla-border rounded-none px-4 py-3 text-xs font-bold text-white focus:border-gorilla-olive outline-none">
+                </div>
+                <button type="submit" class="w-full bg-gorilla-olive hover:bg-gorilla-oliveHover text-white py-4 rounded-none font-black text-xs uppercase tracking-[0.2em] transition-all neon-box-olive">CRIAR CONTA</button>
+                <div class="text-center pt-2">
+                    <button type="button" onclick="alternarTelaAuth('login')" class="text-[10px] text-gorilla-textMuted hover:text-white uppercase font-bold tracking-widest underline">Já tem conta? Faça login</button>
+                </div>
+            </form>
+
             <div id="login-erro" class="text-red-400 text-[10px] uppercase font-bold tracking-wider hidden"></div>
         </div>
     </div>
@@ -100,7 +123,6 @@
             <button onclick="logout()" class="pointer-events-auto bg-gorilla-card border border-gorilla-border hover:border-red-500 text-white px-4 py-2 rounded-none text-[10px] font-bold uppercase tracking-widest transition-all">Sair</button>
         </div>
 
-        <!-- LADO ESQUERDO: MUSCULAÇÃO -->
         <div onclick="entrarSistema('gym')" class="diagonal-side gym-diagonal">
             <div class="max-w-md space-y-3">
                 <span class="text-xs uppercase tracking-[0.3em] text-gorilla-olive font-black neon-text-olive">01 // Consultoria</span>
@@ -114,7 +136,6 @@
             </div>
         </div>
 
-        <!-- LADO DIREITO: BASQUETE -->
         <div onclick="entrarSistema('basket')" class="diagonal-side basket-diagonal">
             <div class="max-w-md space-y-3">
                 <span class="text-xs uppercase tracking-[0.3em] text-gorilla-orange font-black neon-text-orange">02 // Quadra</span>
@@ -132,7 +153,6 @@
     <!-- APLICAÇÃO INTERNA -->
     <div id="view-app" class="min-h-screen flex flex-col md:flex-row hidden">
         
-        <!-- SIDEBAR -->
         <aside class="w-full md:w-64 bg-gorilla-card border-r border-gorilla-border flex flex-col justify-between p-6 shrink-0">
             <div>
                 <div class="mb-8 flex items-center gap-3">
@@ -147,14 +167,12 @@
                     ← Trocar de Módulo
                 </button>
 
-                <!-- Menus Gym -->
                 <nav id="menu-gym" class="space-y-1.5">
                     <button onclick="switchTabGym('dashboard')" id="nav-g-dash" class="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-extrabold tracking-wider uppercase transition-all bg-gorilla-olive text-white neon-box-olive">Painel de Alunos</button>
                     <button onclick="switchTabGym('workouts')" id="nav-g-work" class="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Gestão de Treinos</button>
                     <button onclick="switchTabGym('portal')" id="nav-g-portal" class="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Portal do Aluno (Elite)</button>
                 </nav>
 
-                <!-- Menus Basket -->
                 <nav id="menu-basket" class="space-y-1.5 hidden">
                     <button onclick="switchTabBasket('playbook')" id="nav-b-play" class="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-extrabold tracking-wider uppercase transition-all bg-gorilla-orange text-white neon-box-orange">Playbook & Vídeos</button>
                     <button onclick="switchTabBasket('board')" id="nav-b-board" class="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-semibold tracking-wider uppercase transition-all text-gorilla-textMuted hover:bg-gorilla-border hover:text-white">Prancheta Tática</button>
@@ -170,10 +188,7 @@
             </div>
         </aside>
 
-        <!-- CONTEÚDO PRINCIPAL -->
         <main class="flex-1 p-6 md:p-10 overflow-y-auto max-w-7xl mx-auto w-full">
-            
-            <!-- SISTEMA DE MUSCULAÇÃO -->
             <div id="system-gym" class="space-y-6">
                 <section id="g-tab-dashboard" class="space-y-6">
                     <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
@@ -209,7 +224,6 @@
                 </section>
             </div>
 
-            <!-- SISTEMA DE BASQUETE -->
             <div id="system-basket" class="space-y-6 hidden">
                 <section id="b-tab-playbook" class="space-y-6">
                     <header class="flex justify-between items-center border-b border-gorilla-border pb-6">
@@ -287,7 +301,7 @@
         </main>
     </div>
 
-    <!-- MODAIS (Bordas Retas e Minimalistas) -->
+    <!-- MODAIS -->
     <div id="modal-aluno" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="bg-gorilla-card border border-gorilla-border rounded-none max-w-md w-full p-6 space-y-4 shadow-2xl neon-box-olive">
             <h3 class="text-lg font-black uppercase tracking-wider text-white">Cadastrar Aluno</h3>
@@ -386,8 +400,8 @@
     <!-- SCRIPTS DO FIREBASE E APLICAÇÃO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDmr8g7GxUDwA6XexfkPSpCB4aCY3SxZbc",
@@ -406,12 +420,11 @@
         window.db = db;
         window.auth = auth;
 
-        // Logos SVG personalizadas (Musculação com sua logo e Basquete com Gorila Laranja e bola)
         window.LOGO_GYM = `<div class="w-10 h-10 rounded-none bg-gorilla-olive flex items-center justify-center font-black text-white shadow-md overflow-hidden neon-box-olive">
             <svg viewBox="0 0 100 100" class="w-full h-full object-cover">
                 <circle cx="50" cy="50" r="45" fill="#121212" stroke="#657338" stroke-width="4"/>
-                <path d="M30 60 L70 60 L65 40 L35 40 Z" fill="#657338"/>
-                <text x="50" y="55" font-size="24" font-weight="900" fill="#fff" text-anchor="middle">GT</text>
+                <path d="M25 65 L75 65 L70 35 L30 35 Z" fill="#657338"/>
+                <text x="50" y="58" font-size="28" font-weight="900" fill="#fff" text-anchor="middle">GT</text>
             </svg>
         </div>`;
 
@@ -420,11 +433,11 @@
                 <circle cx="50" cy="50" r="48" fill="#f97316"/>
                 <path d="M10 50 Q50 20 90 50 Q50 80 10 50 Z" stroke="#000" stroke-width="3" fill="none"/>
                 <line x1="50" y1="2" x2="50" y2="98" stroke="#000" stroke-width="3"/>
-                <text x="50" y="58" font-size="22" font-weight="900" fill="#000" text-anchor="middle">🏀</text>
+                <circle cx="50" cy="50" r="15" fill="#000"/>
+                <text x="50" y="57" font-size="18" font-weight="900" fill="#f97316" text-anchor="middle">🏀</text>
             </svg>
         </div>`;
 
-        // Estado de Autenticação
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('view-login').classList.add('hidden');
@@ -443,6 +456,24 @@
             }
         });
 
+        window.alternarTelaAuth = function(tipo) {
+            const fLogin = document.getElementById('form-login');
+            const fReg = document.getElementById('form-registro');
+            const sub = document.getElementById('auth-subtitle');
+            const erroEl = document.getElementById('login-erro');
+            erroEl.classList.add('hidden');
+
+            if(tipo === 'registrar') {
+                fLogin.classList.add('hidden');
+                fReg.classList.remove('hidden');
+                sub.innerText = "Athlete Registration // Join the Elite";
+            } else {
+                fReg.classList.add('hidden');
+                fLogin.classList.remove('hidden');
+                sub.innerText = "Restricted Access // High Performance";
+            }
+        }
+
         window.fazerLoginFirebase = async function(e) {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -453,6 +484,24 @@
                 erroEl.classList.add('hidden');
             } catch (error) {
                 erroEl.innerText = "Erro ao autenticar: Verifique e-mail e senha.";
+                erroEl.classList.remove('hidden');
+            }
+        }
+
+        window.fazerRegistroFirebase = async function(e) {
+            e.preventDefault();
+            const nome = document.getElementById('reg-nome').value;
+            const email = document.getElementById('reg-email').value;
+            const senha = document.getElementById('reg-senha').value;
+            const erroEl = document.getElementById('login-erro');
+            try {
+                // Cria a conta no Auth do Firebase
+                const cred = await createUserWithEmailAndPassword(auth, email, senha);
+                // Salva automaticamente o perfil do aluno no Firestore
+                await addDoc(collection(db, "alunos"), { nome, email, idade: 20, sexo: 'M', uid: cred.user.uid, createdAt: Date.now() });
+                erroEl.classList.add('hidden');
+            } catch (error) {
+                erroEl.innerText = "Erro no registro: " + error.message;
                 erroEl.classList.remove('hidden');
             }
         }
@@ -548,7 +597,6 @@
             if(tab==='calendar') carregarJogos();
         }
 
-        // Funções de CRUD com Firestore
         window.salvarAluno = async function(e) {
             e.preventDefault();
             const nome = document.getElementById('aluno-nome').value;
@@ -569,7 +617,7 @@
                 grid.innerHTML = '';
                 querySnapshot.forEach((docSnap) => {
                     const a = docSnap.data();
-                    grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-2 shadow-sm neon-box-olive"><h3 class="font-extrabold uppercase text-white tracking-tight">${a.nome}</h3><p class="text-xs text-gorilla-textMuted">${a.idade} anos • ${a.sexo === 'M' ? 'Masculino' : 'Feminino'}</p></div>`;
+                    grid.innerHTML += `<div class="bg-gorilla-card border border-gorilla-border rounded-none p-5 space-y-2 shadow-sm neon-box-olive"><h3 class="font-extrabold uppercase text-white tracking-tight">${a.nome}</h3><p class="text-xs text-gorilla-textMuted">${a.idade || 20} anos • ${a.sexo === 'F' ? 'Feminino' : 'Masculino'}</p></div>`;
                 });
             } catch(err) { grid.innerHTML = '<p class="text-xs text-red-400">Erro ao carregar dados do Firestore.</p>'; }
         }
@@ -687,7 +735,6 @@
                 </div>`).join('');
         }
 
-        // Basquete Funções
         window.salvarJogada = async function(e) {
             e.preventDefault();
             const nome = document.getElementById('jogada-nome').value;
